@@ -51,10 +51,14 @@ body {
     overflow-x: hidden;
 }
 
-body.dark-mode {
+body.dark-mode,
+.page-wrapper.dark-mode {
     background-color: var(--bg-dark);
     color: var(--text-dark);
 }
+
+body.dark-mode .container,
+.page-wrapper.dark-mode .container { color: inherit; }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
@@ -153,7 +157,8 @@ button:focus-visible {
     transition: border-color var(--transition-base);
 }
 
-body.dark-mode .header {
+body.dark-mode .header,
+.page-wrapper.dark-mode .header {
     border-color: var(--border-dark);
 }
 
@@ -209,7 +214,8 @@ nav a:hover {
     background-color: var(--bg-secondary-light);
 }
 
-body.dark-mode .theme-toggle:hover {
+body.dark-mode .theme-toggle:hover,
+.page-wrapper.dark-mode .theme-toggle:hover {
     background-color: var(--bg-secondary-dark);
 }
 
@@ -234,7 +240,8 @@ section {
     margin-bottom: 12px;
 }
 
-body.dark-mode .label {
+body.dark-mode .label,
+.page-wrapper.dark-mode .label {
     color: var(--text-secondary-dark);
 }
 
@@ -264,7 +271,8 @@ body.dark-mode .label {
     border-color: var(--border-light);
 }
 
-body.dark-mode .writing-list li {
+body.dark-mode .writing-list li,
+.page-wrapper.dark-mode .writing-list li {
     border-color: var(--border-dark);
 }
 
@@ -281,7 +289,8 @@ body.dark-mode .writing-list li {
     opacity: 0.7;
 }
 
-body.dark-mode .source {
+body.dark-mode .source,
+.page-wrapper.dark-mode .source {
     color: var(--text-secondary-dark);
 }
 
@@ -295,7 +304,8 @@ body.dark-mode .source {
     overflow-x: auto;
 }
 
-body.dark-mode .shelf-tabs {
+body.dark-mode .shelf-tabs,
+.page-wrapper.dark-mode .shelf-tabs {
     border-color: var(--border-dark);
 }
 
@@ -337,7 +347,8 @@ body.dark-mode .shelf-tabs {
     transition: all var(--transition-base);
 }
 
-body.dark-mode .search-box input {
+body.dark-mode .search-box input,
+.page-wrapper.dark-mode .search-box input {
     background-color: var(--bg-secondary-dark);
     border-color: var(--border-dark);
     color: var(--text-dark);
@@ -353,7 +364,8 @@ body.dark-mode .search-box input {
     color: var(--text-secondary-light);
 }
 
-body.dark-mode .search-box input::placeholder {
+body.dark-mode .search-box input::placeholder,
+.page-wrapper.dark-mode .search-box input::placeholder {
     color: var(--text-secondary-dark);
 }
 
@@ -384,7 +396,8 @@ body.dark-mode .search-box input::placeholder {
     background-color: transparent;
 }
 
-body.dark-mode .sort-btn {
+body.dark-mode .sort-btn,
+.page-wrapper.dark-mode .sort-btn {
     border-color: var(--border-dark);
 }
 
@@ -403,6 +416,63 @@ body.dark-mode .sort-btn {
 .item-count {
     margin-left: auto;
     opacity: 0.6;
+}
+
+.year-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.year-btn {
+    padding: 6px 12px;
+    border: 1px solid;
+    border-color: var(--border-light);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.7;
+    transition: all var(--transition-fast);
+    background: none;
+    cursor: pointer;
+}
+
+.page-wrapper.dark-mode .year-btn,
+body.dark-mode .year-btn {
+    border-color: var(--border-dark);
+}
+
+.year-btn:hover,
+.year-btn.active {
+    opacity: 1;
+    border-color: var(--accent);
+}
+
+.year-btn.active {
+    background-color: rgba(48, 102, 255, 0.1);
+}
+
+/* Essays list (shelf tab) */
+.essays-list {
+    list-style: none;
+}
+
+.essays-list li {
+    padding: 16px 0;
+    border-bottom: 1px solid;
+    border-color: var(--border-light);
+}
+
+.page-wrapper.dark-mode .essays-list li,
+body.dark-mode .essays-list li {
+    border-color: var(--border-dark);
+}
+
+.essays-list a {
+    font-size: 16px;
+    font-weight: 500;
 }
 
 /* Grid Layout */
@@ -424,7 +494,8 @@ body.dark-mode .sort-btn {
     box-shadow: var(--shadow-sm);
 }
 
-body.dark-mode .grid-item {
+body.dark-mode .grid-item,
+.page-wrapper.dark-mode .grid-item {
     background-color: var(--bg-secondary-dark);
 }
 
@@ -482,7 +553,8 @@ body.dark-mode .grid-item {
     cursor: pointer;
 }
 
-body.dark-mode .articles-list li {
+body.dark-mode .articles-list li,
+.page-wrapper.dark-mode .articles-list li {
     border-color: var(--border-dark);
 }
 
@@ -536,7 +608,8 @@ body.dark-mode .articles-list li {
     box-shadow: var(--shadow-lg);
 }
 
-body.dark-mode .modal {
+body.dark-mode .modal,
+.page-wrapper.dark-mode .modal {
     background-color: var(--bg-secondary-dark);
 }
 
@@ -560,7 +633,8 @@ body.dark-mode .modal {
     background-color: var(--bg-secondary-light);
 }
 
-body.dark-mode .modal-close:hover {
+body.dark-mode .modal-close:hover,
+.page-wrapper.dark-mode .modal-close:hover {
     background-color: var(--bg-light);
 }
 
@@ -592,7 +666,8 @@ body.dark-mode .modal-close:hover {
     color: var(--text-light);
 }
 
-body.dark-mode .modal-review {
+body.dark-mode .modal-review,
+.page-wrapper.dark-mode .modal-review {
     color: var(--text-dark);
 }
 
@@ -606,7 +681,8 @@ body.dark-mode .modal-review {
     font-size: 14px;
 }
 
-body.dark-mode .footer {
+body.dark-mode .footer,
+.page-wrapper.dark-mode .footer {
     border-color: var(--border-dark);
     color: var(--text-secondary-dark);
 }
@@ -644,7 +720,8 @@ body.dark-mode .footer {
     border: 1px solid var(--border-light);
 }
 
-body.dark-mode .scroll-top {
+body.dark-mode .scroll-top,
+.page-wrapper.dark-mode .scroll-top {
     background-color: var(--bg-secondary-dark);
     color: var(--text-dark);
     border-color: var(--border-dark);
