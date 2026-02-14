@@ -3,30 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal portfolio and collection">
+    <meta name="theme-color" content="#ffffff">
+    
+    <title>Your Name - Portfolio</title>
+    
     <link rel="stylesheet" href="css/styles.css">
-    <title>Portfolio</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>✦</text></svg>">
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Portfolio</h1>
-    </header>
-    <main>
-        <section id="projects">
-            <h2>My Projects</h2>
-            <ul>
-                <li><a href="#">Project 1</a></li>
-                <li><a href="#">Project 2</a></li>
-                <li><a href="#">Project 3</a></li>
-            </ul>
-        </section>
-        <section id="about">
-            <h2>About Me</h2>
-            <p>Short description about myself.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Antolin JM</p>
-    </footer>
+    <div class="page-wrapper" id="page-wrapper">
+        <div class="container">
+            <!-- Header -->
+            <header class="header fade-in">
+                <div class="header-left">
+                    <a href="#" class="site-title">Your Name</a>
+                    <nav>
+                        <a href="#about">About</a>
+                        <a href="#work">Work</a>
+                        <a href="#writing">Writing</a>
+                        <a href="#shelf">Library</a>
+                    </nav>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                    <span class="theme-icon">☀</span>
+                </button>
+            </header>
+
+            <!-- Hero Image -->
+            <div class="hero-image fade-in">
+                <img src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1200&h=400&fit=crop" alt="Hero">
+            </div>
+
+            <!-- About Section -->
+            <section id="about" class="about-section fade-in">
+                <h2 class="section-title">About</h2>
+                
+                <p class="label">//now//</p>
+                <ul class="content-list">
+                    <li>Building things that matter</li>
+                    <li>Writing about technology and design</li>
+                    <li>Exploring the intersection of code and creativity</li>
+                </ul>
+
+                <p class="label">//previously//</p>
+                <ul class="content-list">
+                    <li>Worked at <a href="#">Tech Company</a></li>
+                    <li>Founded <a href="#">A Project</a></li>
+                    <li>Contributed to <a href="#">Open Source</a></li>
+                </ul>
+
+                <p class="label">//elsewhere//</p>
+                <ul class="content-list">
+                    <li><a href="#">Twitter / X</a></li>
+                    <li><a href="#">GitHub</a></li>
+                    <li><a href="#">LinkedIn</a></li>
+                </ul>
+            </section>
+
+            <!-- Writing Section -->
+            <section id="writing" class="writing-section fade-in">
+                <h2 class="section-title">Writing</h2>
+                <ul class="writing-list">
+                    <li>
+                        <a href="#">The Future of Web Design</a>
+                        <div class="source">Your Blog · 2024</div>
+                    </li>
+                    <li>
+                        <a href="#">Building Better Products</a>
+                        <div class="source">Medium · 2024</div>
+                    </li>
+                    <li>
+                        <a href="#">Learning in Public</a>
+                        <div class="source">Dev.to · 2023</div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Shelf/Library Section -->
+            <section id="shelf" class="shelf-section fade-in">
+                <h2 class="section-title">Library</h2>
+                
+                <div class="shelf-tabs">
+                    <button class="shelf-tab active" onclick="switchTab('books')">Books</button>
+                    <button class="shelf-tab" onclick="switchTab('articles')">Articles</button>
+                    <button class="shelf-tab" onclick="switchTab('projects')">Projects</button>
+                </div>
+
+                <!-- Books Tab -->
+                <div id="tab-books" class="tab-content active">
+                    <div class="search-box">
+                        <input type="text" id="book-search" placeholder="Search books..." oninput="searchBooks()">
+                    </div>
+                    <div class="sort-controls">
+                        <span>Filter:</span>
+                        <button class="sort-btn active" onclick="sortBooks('all')">All</button>
+                        <button class="sort-btn" onclick="sortBooks('favorites')">❤ Favorites</button>
+                        <button class="sort-btn" onclick="sortBooks('top')">★ Top Pick</button>
+                        <span class="item-count" id="book-count">0 books</span>
+                    </div>
+                    <div class="grid" id="books-grid"></div>
+                </div>
+
+                <!-- Articles Tab -->
+                <div id="tab-articles" class="tab-content">
+                    <div class="search-box">
+                        <input type="text" id="article-search" placeholder="Search articles..." oninput="searchArticles()">
+                    </div>
+                    <div class="sort-controls">
+                        <span>Filter:</span>
+                        <button class="sort-btn active" onclick="sortArticles('all')">All</button>
+                        <button class="sort-btn" onclick="sortArticles('favorites')">❤ Favorites</button>
+                        <span class="item-count" id="article-count">0 articles</span>
+                    </div>
+                    <div class="articles-list" id="articles-list"></div>
+                </div>
+
+                <!-- Projects Tab -->
+                <div id="tab-projects" class="tab-content">
+                    <div class="search-box">
+                        <input type="text" id="project-search" placeholder="Search projects..." oninput="searchProjects()">
+                    </div>
+                    <div class="grid" id="projects-grid"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div>Made with care</div>
+            <div class="social-links">
+                <a href="https://github.com" target="_blank">GitHub</a>
+                <a href="https://twitter.com" target="_blank">Twitter</a>
+            </div>
+        </footer>
+
+        <!-- Scroll to top button -->
+        <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</button>
+    </div>
+
+    <!-- Modal for books/items -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
     <script src="js/theme.js"></script>
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
