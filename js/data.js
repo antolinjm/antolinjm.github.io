@@ -1,26 +1,85 @@
-// Books (for Bookshelf tab)
-const books = [
-    { title: "The Innovators", author: "Walter Isaacson", isbn: "9781476708690", badge: "★", year: "2024", review: "A compelling exploration of the minds behind the digital revolution." },
-    { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", isbn: "9780374533557", badge: "❤", year: "2024", review: "Deep dive into human decision-making." },
-    { title: "Atomic Habits", author: "James Clear", isbn: "9780735211292", badge: "❤", year: "2023", review: "Practical framework for building lasting habits." },
-    { title: "The Design of Everyday Things", author: "Don Norman", isbn: "9780465050659", badge: "★", year: "2023", review: "Essential for anyone building products." },
-    { title: "Sapiens", author: "Yuval Noah Harari", isbn: "9780062316097", badge: "❤", year: "2023", review: "A sweeping history of humankind." },
-    { title: "The Mythical Man-Month", author: "Frederick Brooks", isbn: "9780201835952", badge: null, year: "2023", review: "Classic software engineering wisdom." }
-];
+// Canonical badge values used across shelves.
+const BADGE = Object.freeze({
+    TOP: 'top',
+    FAVORITE: 'favorite',
+    CORE: 'core'
+});
 
-// Movies (for Movie Shelf tab)
-const movies = [
-    { title: "Everything Everywhere All at Once", year: "2024", badge: "★", review: "Mind-bending and heartfelt." },
-    { title: "Past Lives", year: "2024", badge: "❤", review: "Quiet and moving." },
-    { title: "The Holdovers", year: "2024", badge: "❤", review: "Warm character study." },
-    { title: "Oppenheimer", year: "2023", badge: "★", review: "Epic and intimate." },
-    { title: "Spider-Man: Across the Spider-Verse", year: "2023", badge: "❤", review: "Visual and narrative triumph." }
-];
+function book(title, author, year, { isbn = null, badge = null, review = '' } = {}) {
+    return { title, author, year: String(year), isbn, badge, review };
+}
 
-// Essays (for Essays tab - core texts / reading list)
-const essays = [
-    { title: "How to Do What You Love", source: "Paul Graham", url: "https://www.paulgraham.com/love.html", badge: "★" },
-    { title: "What You Can't Say", source: "Paul Graham", url: "https://www.paulgraham.com/say.html", badge: "★" },
-    { title: "The Internet is a Portal", source: "Drew Coffman", url: "https://paragraph.com/@drewcoffman-2/the-internet-is-a-portal", badge: "★" },
-    { title: "the ghosts of internets past", source: "FWB", url: "https://v1.fwb.help/editorial/lessons-from-the-rise-and-fall-of-bulletin-board-systems-web3", badge: null }
-];
+function movie(title, year, { badge = null, review = '' } = {}) {
+    return { title, year: String(year), badge, review };
+}
+
+function essay(title, source, url, { badge = null } = {}) {
+    return { title, source, url, badge };
+}
+
+const shelfData = {
+    books: [
+        book('The Innovators', 'Walter Isaacson', 2024, {
+            isbn: '9781476708690',
+            badge: BADGE.TOP,
+            review: 'A compelling exploration of the minds behind the digital revolution.'
+        }),
+        book('Thinking, Fast and Slow', 'Daniel Kahneman', 2024, {
+            isbn: '9780374533557',
+            badge: BADGE.FAVORITE,
+            review: 'Deep dive into human decision-making.'
+        }),
+        book('Atomic Habits', 'James Clear', 2023, {
+            isbn: '9780735211292',
+            badge: BADGE.FAVORITE,
+            review: 'Practical framework for building lasting habits.'
+        }),
+        book('The Design of Everyday Things', 'Don Norman', 2023, {
+            isbn: '9780465050659',
+            badge: BADGE.TOP,
+            review: 'Essential for anyone building products.'
+        }),
+        book('Sapiens', 'Yuval Noah Harari', 2023, {
+            isbn: '9780062316097',
+            badge: BADGE.FAVORITE,
+            review: 'A sweeping history of humankind.'
+        }),
+        book('The Mythical Man-Month', 'Frederick Brooks', 2023, {
+            isbn: '9780201835952',
+            review: 'Classic software engineering wisdom.'
+        })
+    ],
+    movies: [
+        movie('Everything Everywhere All at Once', 2024, {
+            badge: BADGE.TOP,
+            review: 'Mind-bending and heartfelt.'
+        }),
+        movie('Past Lives', 2024, {
+            badge: BADGE.FAVORITE,
+            review: 'Quiet and moving.'
+        }),
+        movie('The Holdovers', 2024, {
+            badge: BADGE.FAVORITE,
+            review: 'Warm character study.'
+        }),
+        movie('Oppenheimer', 2023, {
+            badge: BADGE.TOP,
+            review: 'Epic and intimate.'
+        }),
+        movie('Spider-Man: Across the Spider-Verse', 2023, {
+            badge: BADGE.FAVORITE,
+            review: 'Visual and narrative triumph.'
+        })
+    ],
+    essays: [
+        essay('How to Do What You Love', 'Paul Graham', 'https://www.paulgraham.com/love.html', { badge: BADGE.CORE }),
+        essay("What You Can't Say", 'Paul Graham', 'https://www.paulgraham.com/say.html', { badge: BADGE.CORE }),
+        essay('The Internet is a Portal', 'Drew Coffman', 'https://paragraph.com/@drewcoffman-2/the-internet-is-a-portal', { badge: BADGE.CORE }),
+        essay('the ghosts of internets past', 'FWB', 'https://v1.fwb.help/editorial/lessons-from-the-rise-and-fall-of-bulletin-board-systems-web3')
+    ]
+};
+
+// Backward-compatible globals consumed by main.js.
+const books = shelfData.books;
+const movies = shelfData.movies;
+const essays = shelfData.essays;
