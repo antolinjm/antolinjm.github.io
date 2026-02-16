@@ -5,6 +5,12 @@ let currentEssayFilter = 'all';
 let currentBookYear = null;
 let currentMovieYear = null;
 
+const BADGE_ICON = Object.freeze({
+    top: '\u2605',
+    favorite: '\u2764',
+    core: '\u2605'
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof loadTheme === 'function') loadTheme();
     setupShelfTabs();
@@ -88,23 +94,23 @@ function setupYearButtons() {
 
 function filterBooks() {
     let list = books.slice();
-    if (currentBookFilter === 'favorites') list = list.filter(b => b.badge === '❤' || b.badge === '★');
-    else if (currentBookFilter === 'top') list = list.filter(b => b.badge === '★');
+    if (currentBookFilter === 'favorites') list = list.filter(b => ['favorite', 'top'].includes(normalizeBadge(b.badge)));
+    else if (currentBookFilter === 'top') list = list.filter(b => normalizeBadge(b.badge) === 'top');
     if (currentBookYear) list = list.filter(b => b.year === currentBookYear);
     return list;
 }
 
 function filterMovies() {
     let list = movies.slice();
-    if (currentMovieFilter === 'favorites') list = list.filter(m => m.badge === '❤' || m.badge === '★');
-    else if (currentMovieFilter === 'top') list = list.filter(m => m.badge === '★');
+    if (currentMovieFilter === 'favorites') list = list.filter(m => ['favorite', 'top'].includes(normalizeBadge(m.badge)));
+    else if (currentMovieFilter === 'top') list = list.filter(m => normalizeBadge(m.badge) === 'top');
     if (currentMovieYear) list = list.filter(m => m.year === currentMovieYear);
     return list;
 }
 
 function filterEssays() {
     let list = essays.slice();
-    if (currentEssayFilter === 'top') list = list.filter(e => e.badge === '★');
+    if (currentEssayFilter === 'top') list = list.filter(e => ['core', 'top'].includes(normalizeBadge(e.badge)));
     return list;
 }
 
@@ -126,7 +132,7 @@ function populateBooks() {
         if (book.badge) {
             const badge = document.createElement('span');
             badge.className = 'badge';
-            badge.textContent = book.badge;
+            badge.textContent = badgeIcon(book.badge);
             div.appendChild(badge);
         }
         if (book.isbn) {
@@ -163,7 +169,7 @@ function populateMovies() {
         if (movie.badge) {
             const badge = document.createElement('span');
             badge.className = 'badge';
-            badge.textContent = movie.badge;
+            badge.textContent = badgeIcon(movie.badge);
             div.appendChild(badge);
         }
         grid.appendChild(div);
@@ -181,7 +187,7 @@ function populateEssays() {
         const li = document.createElement('li');
         li.innerHTML = `
             <a href="${escapeAttr(essay.url)}" target="_blank" rel="noopener">${escapeHtml(essay.title)}</a>
-            ${essay.badge ? `<span class="badge" style="margin-left:8px">${essay.badge}</span>` : ''}
+            ${essay.badge ? `<span class="badge" style="margin-left:8px">${badgeIcon(essay.badge)}</span>` : ''}
             <div class="source">${escapeHtml(essay.source)}</div>
         `;
         listEl.appendChild(li);
@@ -245,3 +251,20 @@ function escapeHtml(text) {
 function escapeAttr(text) {
     return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+function normalizeBadge(badge) {
+    if (!badge) return null;
+    const value = String(badge).trim().toLowerCase();
+
+    if (value === 'top' || value === 'favorite' || value === 'core') return value;
+    if (value === '\u2605') return 'top';
+    if (value === '\u2764') return 'favorite';
+
+    return value;
+}
+
+function badgeIcon(badge) {
+    const normalized = normalizeBadge(badge);
+    return BADGE_ICON[normalized] || String(badge);
+}
+
