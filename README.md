@@ -1,70 +1,132 @@
-# Welcome to My Portfolio
+# Personal Portfolio Site
 
-This is my personal portfolio website. Here you can find my projects and contact information.
+Static portfolio site with an About section, writing links, and a three-tab Shelf (Books, Movies, Essays).
 
----
+## Stack
 
-## Updating the site with new books or reads
+- HTML (`index.html`)
+- CSS (`styles.css`)
+- Vanilla JavaScript (`js/theme.js`, `js/data.js`, `js/main.js`)
 
-All shelf content (books, movies, essays) is stored in **`js/data.js`**. Edit that file to add or change items.
+## Run Locally
 
-### Adding a new book (Bookshelf)
+This is a static site, so no build step is required.
 
-Add an object to the `books` array. Each book can have:
+1. Clone the repo.
+2. Open `index.html` in a browser.
 
-| Field    | Required | Description |
-|----------|----------|-------------|
-| `title`  | Yes      | Book title |
-| `author` | Yes      | Author name |
-| `isbn`   | Yes*     | 10- or 13-digit ISBN. Used to fetch the cover from Open Library. Omit for no cover image. |
-| `year`   | Yes      | Year read (e.g. `"2024"`). Used by the year filter. |
-| `review` | No       | Short review shown in the detail modal. |
-| `badge`  | No       | `"★"` (Life-Changing) or `"❤"` (Liked). Omit or use `null` for no badge. |
+Optional (recommended): run a local static server.
+
+```bash
+# Python 3
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
+
+## Project Structure
+
+- `index.html`: Main page layout and section structure.
+- `styles.css`: Styling and responsive behavior.
+- `js/data.js`: Shelf content data (books, movies, essays).
+- `js/main.js`: Rendering logic, tab/filter handling, modal behavior.
+- `js/theme.js`: Theme toggle and theme persistence.
+- `script.js`: Legacy script file (not loaded by `index.html`).
+
+## Content Editing
+
+Shelf content is managed in `js/data.js`.
+
+The file uses:
+
+- `BADGE` constants: `BADGE.TOP`, `BADGE.FAVORITE`, `BADGE.CORE`
+- Helper constructors: `book(...)`, `movie(...)`, `essay(...)`
+- A single `shelfData` object that contains all arrays
+
+### Books (`shelfData.books`)
+
+Each book item supports:
+
+- `title` (required)
+- `author` (required)
+- `isbn` (optional, used for Open Library cover images)
+- `year` (required, stored as string, used by year filter)
+- `review` (optional)
+- `badge` (optional, use `BADGE.TOP` or `BADGE.FAVORITE`)
 
 Example:
 
-```javascript
-{ title: "Your Book Title", author: "Author Name", isbn: "9780123456789", badge: "❤", year: "2025", review: "Why you liked it." }
+```js
+book("The Example Book", "Author Name", 2026, {
+  isbn: "9780123456789",
+  badge: BADGE.TOP,
+  review: "Short note about why this mattered."
+})
 ```
 
-### Adding a new movie (Movie Shelf)
+### Movies (`shelfData.movies`)
 
-Add an object to the `movies` array:
+Each movie item supports:
 
-| Field    | Required | Description |
-|----------|----------|-------------|
-| `title`  | Yes      | Movie title |
-| `year`   | Yes      | Year (e.g. `"2024"`). Used by the year filter. |
-| `review` | No       | Short review in the detail modal. |
-| `badge`  | No       | `"★"` (All-Timers) or `"❤"` (Liked). Omit or `null` for no badge. |
+- `title` (required)
+- `year` (required, stored as string)
+- `review` (optional)
+- `badge` (optional, use `BADGE.TOP` or `BADGE.FAVORITE`)
 
 Example:
 
-```javascript
-{ title: "Movie Name", year: "2025", badge: "★", review: "Why it's an all-timer." }
+```js
+movie("Example Movie", 2025, {
+  badge: BADGE.FAVORITE,
+  review: "Short note."
+})
 ```
 
-### Adding a new essay or read (Essays tab)
+### Essays (`shelfData.essays`)
 
-Add an object to the `essays` array:
+Each essay item supports:
 
-| Field    | Required | Description |
-|----------|----------|-------------|
-| `title`  | Yes      | Essay or article title |
-| `source` | Yes      | Author or publication name (e.g. `"Paul Graham"`) |
-| `url`    | Yes      | Full URL to the piece. |
-| `badge`  | No       | `"★"` for Core Texts. Omit or `null` for no badge. |
+- `title` (required)
+- `source` (required)
+- `url` (required)
+- `badge` (optional, use `BADGE.CORE`)
 
 Example:
 
-```javascript
-{ title: "Essay Title", source: "Author or Site", url: "https://example.com/essay", badge: "★" }
+```js
+essay("Example Essay", "Example Publication", "https://example.com/article", {
+  badge: BADGE.CORE
+})
 ```
 
-### After editing
+## Filters and Years
 
-1. Save `js/data.js`.
-2. Refresh the site in your browser (or push to GitHub if you use GitHub Pages).
-3. New items appear in the correct shelf tab; filters (All / ★ / ❤ and year) work automatically.
+- Type filters (`All`, `All-Timers/Core Texts`, `Liked`) are wired in `js/main.js`.
+- Year filters are hardcoded in `index.html` under each tab's `year-filters` block.
 
-To add a new filter year (e.g. 2027), add a year button in `index.html` in the Bookshelf and/or Movie Shelf sections (look for `year-filters` and copy an existing `year-btn`), and give it `data-year="2027"`.
+To add a new year filter:
+
+1. Copy an existing year button in the relevant tab (`Books` or `Movies`) in `index.html`.
+2. Set `data-year` and label to the new year (for example, `2027`).
+
+Example button:
+
+```html
+<button class="year-btn" data-year="2027">2027</button>
+```
+
+## Deployment
+
+Designed for GitHub Pages or any static hosting provider.
+
+1. Commit changes.
+2. Push to your publishing branch.
+3. Verify the deployed site after publish.
+
+## Troubleshooting
+
+- Old symbol badges (star/heart) are still supported, but new entries should use BADGE.* values.
+- Covers not loading: verify `isbn` values are valid 10- or 13-digit ISBNs and available in Open Library.
+- Content not updating: hard refresh the browser to clear cached JS.
+
+
