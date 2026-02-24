@@ -12,7 +12,7 @@ Static portfolio site with an About section, writing links, and a three-tab Shel
 
 This is a static site, so no build step is required.
 
-1. Clone the repo.
+1. Clone the repo
 2. Open `index.html` in a browser.
 
 Optional (recommended): run a local static server.
