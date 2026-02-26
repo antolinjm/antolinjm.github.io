@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LTV / CAC Calculator — antolinjm</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,117 +16,135 @@
       --muted: #6b6b65;
       --accent: #c8440a;
       --border: #d4d2cb;
-      --card: #eeece7;
+      --card: #eceae4;
+      --white: #ffffff;
       --good: #2a7a3b;
+      --good-bg: #d4edda;
       --warn: #b87a00;
+      --warn-bg: #fff3cd;
       --bad: #c8440a;
+      --bad-bg: #fde8e2;
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'IBM Plex Sans', sans-serif;
       background: var(--bg);
       color: var(--ink);
       min-height: 100vh;
-      padding: 2rem 1rem 4rem;
+      padding: 2.5rem 2rem 6rem;
     }
 
-    a { color: var(--ink); }
+    a { color: var(--muted); text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
+    a:hover { color: var(--ink); }
 
     header {
-      max-width: 760px;
-      margin: 0 auto 3rem;
+      max-width: 1200px;
+      margin: 0 auto 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: baseline;
     }
 
-    .site-name {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.85rem;
-      text-decoration: none;
-      color: var(--muted);
-    }
-    .site-name:hover { color: var(--ink); }
-
-    .main {
-      max-width: 760px;
-      margin: 0 auto;
-    }
+    .main { max-width: 1200px; margin: 0 auto; }
 
     h1 {
-      font-family: 'DM Mono', monospace;
-      font-size: 1.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.4rem;
       font-weight: 400;
       letter-spacing: -0.02em;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
     }
 
     .subtitle {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--muted);
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
       line-height: 1.5;
-      max-width: 520px;
     }
 
-    .grid {
+    /* Layout */
+    .layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      grid-template-columns: 420px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 780px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 0.75rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .panel-body { padding: 1.4rem; }
+
+    /* Input groups */
+    .input-group {
       margin-bottom: 1rem;
     }
 
-    @media (max-width: 560px) {
-      .grid { grid-template-columns: 1fr; }
+    .input-group:last-child { margin-bottom: 0; }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
+    .field { display: flex; flex-direction: column; gap: 0.35rem; }
 
     label {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
-      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .prefix {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.85rem;
+      letter-spacing: 0.06em;
       color: var(--muted);
-      padding: 0 0.5rem 0 0.75rem;
-      position: absolute;
-      left: 0;
-      pointer-events: none;
     }
 
-    .suffix {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.85rem;
+    .hint {
+      font-size: 0.67rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.1rem;
+    }
+
+    .input-wrap { position: relative; display: flex; align-items: center; }
+
+    .prefix, .suffix {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem;
       color: var(--muted);
       position: absolute;
-      right: 0.75rem;
       pointer-events: none;
     }
+    .prefix { left: 0.65rem; }
+    .suffix { right: 0.65rem; }
 
     input[type="number"] {
       width: 100%;
-      background: white;
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.6rem 2rem 0.6rem 1.75rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.95rem;
+      border-radius: 5px;
+      padding: 0.5rem 1.8rem 0.5rem 1.6rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.88rem;
       color: var(--ink);
       outline: none;
       transition: border-color 0.15s;
@@ -133,195 +152,368 @@
     }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    input[type="number"]:focus { border-color: var(--ink); }
-    input.no-prefix { padding-left: 0.75rem; }
+    input[type="number"]:focus { border-color: var(--ink); background: white; }
+    input.no-prefix { padding-left: 0.65rem; }
+    input.no-suffix { padding-right: 0.65rem; }
 
-    .hint {
-      font-size: 0.72rem;
+    .cac-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.8rem;
+      background: var(--card);
+      border-radius: 5px;
+      margin-top: 0.75rem;
+    }
+    .cac-total-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--muted);
-      font-style: italic;
+    }
+    .cac-total-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      font-weight: 500;
     }
 
-    .divider {
-      border: none;
+    .section-divider {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
       border-top: 1px solid var(--border);
-      margin: 1.5rem 0;
+      padding-top: 1.1rem;
+      margin: 1.1rem 0 0.9rem;
     }
 
-    /* Results */
-    .results {
+    /* Benchmarks */
+    .benchmarks {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
+    @media (max-width: 600px) {
+      .benchmarks { grid-template-columns: 1fr 1fr; }
+    }
+    .benchmark-card {
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .benchmark-card.active-benchmark {
+      border-color: currentColor;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .benchmark-ratio {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.1;
+      margin-bottom: 0.3rem;
+    }
+    .benchmark-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .benchmark-desc {
+      font-size: 0.68rem;
+      line-height: 1.5;
+    }
 
-    @media (max-width: 560px) {
-      .results { grid-template-columns: 1fr 1fr; }
+    /* Results grid */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 500px) {
+      .results-grid { grid-template-columns: 1fr 1fr; }
     }
 
     .metric {
       background: var(--card);
-      border-radius: 8px;
-      padding: 1rem 1.1rem;
+      border-radius: 7px;
+      padding: 1.1rem 1.2rem;
     }
 
     .metric-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.68rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       color: var(--muted);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.3rem;
     }
 
     .metric-value {
-      font-family: 'DM Mono', monospace;
-      font-size: 1.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.4rem;
       font-weight: 500;
       letter-spacing: -0.03em;
-      line-height: 1;
+      line-height: 1.1;
     }
 
     .metric-sub {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       color: var(--muted);
-      margin-top: 0.3rem;
+      margin-top: 0.25rem;
     }
 
     .badge {
       display: inline-block;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.68rem;
-      padding: 0.15rem 0.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      padding: 0.12rem 0.45rem;
       border-radius: 3px;
-      margin-top: 0.4rem;
+      margin-top: 0.35rem;
     }
+    .badge.good { background: var(--good-bg); color: var(--good); }
+    .badge.warn { background: var(--warn-bg); color: var(--warn); }
+    .badge.bad  { background: var(--bad-bg);  color: var(--bad); }
 
-    .badge.good { background: #d4edda; color: var(--good); }
-    .badge.warn { background: #fff3cd; color: var(--warn); }
-    .badge.bad  { background: #fde8e2; color: var(--bad); }
-
-    /* Verdict bar */
+    /* Verdict */
     .verdict {
       background: var(--card);
-      border-radius: 8px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1.5rem;
+      border-radius: 7px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       align-items: flex-start;
-    }
-
-    .verdict-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
-
-    .verdict-text {
-      font-size: 0.88rem;
-      line-height: 1.55;
-      color: var(--ink);
-    }
-
-    .verdict-text strong {
-      font-family: 'DM Mono', monospace;
       font-size: 0.83rem;
+      line-height: 1.55;
     }
+    .verdict-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .verdict strong { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
 
-    /* Sensitivity heatmap */
-    .section-title {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
+    /* Payback bar */
+    .payback-wrap {
+      background: var(--card);
+      border-radius: 7px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .payback-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.6rem;
+    }
+    .payback-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: var(--muted);
-      margin-bottom: 0.8rem;
+    }
+    .payback-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .bar-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-bottom: 0.3rem;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.35s ease;
+      min-width: 3px;
+    }
+    .bar-markers {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--muted);
     }
 
+    /* Chart */
+    .chart-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .chart-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .chart-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+    .chart-milestones {
+      display: flex;
+      gap: 1rem;
+    }
+    .milestone {
+      text-align: right;
+    }
+    .milestone-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .milestone-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .milestone-val.highlight { color: var(--accent); }
+    canvas { max-height: 200px; }
+
+    /* Heatmap */
     .heatmap-wrap {
-      overflow-x: auto;
-      margin-bottom: 1.5rem;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
     }
-
+    .heatmap-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .heatmap-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+    }
+    .heatmap-scroll { overflow-x: auto; }
     table.heatmap {
       width: 100%;
-      border-collapse: collapse;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.75rem;
+      border-collapse: separate;
+      border-spacing: 3px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
     }
-
     table.heatmap th {
-      padding: 0.35rem 0.5rem;
+      padding: 0.3rem 0.4rem;
       text-align: center;
       color: var(--muted);
       font-weight: 400;
       white-space: nowrap;
     }
-
     table.heatmap td {
-      padding: 0.35rem 0.5rem;
+      padding: 0.4rem 0.5rem;
       text-align: center;
-      border-radius: 3px;
-      transition: background 0.2s;
+      border-radius: 4px;
     }
-
     table.heatmap td.row-header {
       color: var(--muted);
       text-align: right;
-      padding-right: 0.8rem;
+      padding-right: 0.6rem;
+      background: none;
     }
 
-    .axis-label {
-      font-family: 'DM Mono', monospace;
+    /* CAC breakdown note */
+    .cac-note {
       font-size: 0.68rem;
       color: var(--muted);
-      text-align: center;
+      font-style: italic;
       margin-top: 0.4rem;
     }
 
-    /* Payback chart */
-    .payback-bar-wrap {
-      background: var(--card);
-      border-radius: 8px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1.5rem;
+    /* CAC breakdown bar */
+    .cac-breakdown {
+      margin-top: 1rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--border);
     }
-
-    .bar-track {
-      height: 8px;
-      background: var(--border);
-      border-radius: 4px;
-      margin: 0.8rem 0 0.4rem;
-      position: relative;
-      overflow: visible;
-    }
-
-    .bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.4s ease;
-      min-width: 4px;
-    }
-
-    .bar-markers {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'DM Mono', monospace;
+    .cac-breakdown-title {
+      font-family: 'IBM Plex Mono', monospace;
       font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--muted);
-      margin-top: 0.2rem;
+      margin-bottom: 0.6rem;
+    }
+    .stacked-bar {
+      display: flex;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 0.65rem;
+    }
+    .stacked-bar-segment {
+      height: 100%;
+      transition: width 0.35s ease;
+    }
+    .cac-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .cac-legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+    }
+    .cac-legend-left {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .cac-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .cac-legend-label { color: var(--muted); }
+    .cac-legend-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--ink);
+    }
+    .cac-legend-pct {
+      color: var(--muted);
+      font-size: 0.65rem;
     }
 
     .footnote {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.7;
       border-top: 1px solid var(--border);
-      padding-top: 1.5rem;
+      padding-top: 1.2rem;
       margin-top: 1rem;
     }
-
     .footnote strong {
-      font-family: 'DM Mono', monospace;
-      font-weight: 500;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
       color: var(--ink);
     }
   </style>
@@ -329,127 +521,260 @@
 <body>
 
 <header>
-  <a class="site-name" href="/">← antolinjm</a>
-  <span class="site-name">tools / ltv-cac</span>
+  <a href="/">← antolinjm</a>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--muted)">tools / ltv-cac</span>
 </header>
 
 <div class="main">
   <h1>LTV / CAC Calculator</h1>
-  <p class="subtitle">Retail & subscription unit economics. Margin-adjusted LTV, payback period, and sensitivity analysis across churn and acquisition cost scenarios.</p>
+  <p class="subtitle">Retail & subscription unit economics — margin-adjusted LTV, payback projection, and sensitivity analysis.</p>
 
-  <!-- Inputs -->
-  <div class="grid">
-    <div class="field">
-      <label>Avg. ticket / order value</label>
-      <div class="input-wrap">
-        <span class="prefix">€</span>
-        <input type="number" id="aov" value="65" min="0" step="1" />
+  <div class="layout">
+
+    <!-- LEFT: Inputs -->
+    <div>
+
+      <!-- LTV Inputs -->
+      <div class="panel" style="margin-bottom:1rem">
+        <div class="panel-header">Customer value</div>
+        <div class="panel-body">
+          <div class="input-row" style="margin-bottom:0.75rem">
+            <div class="field">
+              <label>Avg. ticket / AOV</label>
+              <div class="input-wrap">
+                <span class="prefix">€</span>
+                <input type="number" id="aov" value="65" min="0" step="1" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Purchase frequency</label>
+              <div class="input-wrap">
+                <input type="number" id="freq" value="4" min="0.1" step="0.5" class="no-prefix" />
+                <span class="suffix">×/yr</span>
+              </div>
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="field">
+              <label>Gross margin</label>
+              <div class="input-wrap">
+                <input type="number" id="margin" value="45" min="1" max="100" step="1" class="no-prefix" />
+                <span class="suffix">%</span>
+              </div>
+              <span class="hint">After COGS, not overhead</span>
+            </div>
+            <div class="field">
+              <label>Annual churn</label>
+              <div class="input-wrap">
+                <input type="number" id="churn" value="30" min="1" max="100" step="1" class="no-prefix" />
+                <span class="suffix">%</span>
+              </div>
+              <span class="hint">% customers lost / year</span>
+            </div>
+          </div>
+          <div class="input-row" style="margin-top:0.75rem">
+            <div class="field">
+              <label>Discount rate</label>
+              <div class="input-wrap">
+                <input type="number" id="discount" value="10" min="0" max="50" step="1" class="no-prefix" />
+                <span class="suffix">%</span>
+              </div>
+              <span class="hint">WACC or hurdle rate</span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- CAC Inputs -->
+      <div class="panel">
+        <div class="panel-header">Acquisition cost breakdown</div>
+        <div class="panel-body">
+
+          <div class="section-divider">Media & advertising</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Media spend / mo</label>
+              <div class="input-wrap">
+                <span class="prefix">€</span>
+                <input type="number" id="media_spend" value="5000" min="0" step="100" />
+              </div>
+            </div>
+            <div class="field">
+              <label>New customers / mo</label>
+              <div class="input-wrap">
+                <input type="number" id="new_customers" value="120" min="1" step="1" class="no-prefix" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider">Sales team</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Sales headcount</label>
+              <div class="input-wrap">
+                <input type="number" id="sales_hc" value="2" min="0" step="1" class="no-prefix" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Avg. salary / year</label>
+              <div class="input-wrap">
+                <span class="prefix">€</span>
+                <input type="number" id="sales_salary" value="35000" min="0" step="1000" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider">Operations & tools</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Ops cost / mo</label>
+              <div class="input-wrap">
+                <span class="prefix">€</span>
+                <input type="number" id="ops_cost" value="800" min="0" step="100" />
+              </div>
+              <span class="hint">CRM, tools, events…</span>
+            </div>
+          </div>
+
+          <div class="cac-total-row">
+            <span class="cac-total-label">Blended CAC</span>
+            <span class="cac-total-value" id="cac-display">€—</span>
+          </div>
+          <p class="cac-note">= (all monthly costs × 12) / (new customers / mo × 12)</p>
+
+          <div class="cac-breakdown">
+            <div class="cac-breakdown-title">CAC composition</div>
+            <div class="stacked-bar" id="cac-bar">
+              <div class="stacked-bar-segment" id="bar-media" style="background:#c8440a"></div>
+              <div class="stacked-bar-segment" id="bar-sales" style="background:#b87a00"></div>
+              <div class="stacked-bar-segment" id="bar-ops"   style="background:#6b9e7a"></div>
+            </div>
+            <div class="cac-legend" id="cac-legend"></div>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div class="field">
-      <label>Purchase frequency (per year)</label>
-      <div class="input-wrap">
-        <input type="number" id="freq" value="4" min="0.1" step="0.5" class="no-prefix" />
-        <span class="suffix">×/yr</span>
+
+    <!-- RIGHT: Outputs -->
+    <div>
+
+      <!-- Benchmarks -->
+      <div class="benchmarks" id="benchmarks">
+        <div class="benchmark-card" id="bm-excellent" style="background:#d4edda;color:#2a7a3b">
+          <div class="benchmark-ratio">+5×</div>
+          <div class="benchmark-label">Excellent</div>
+          <div class="benchmark-desc" style="color:#2a7a3b99">Outstanding unit economics. Scale aggressively and consider premium pricing.</div>
+        </div>
+        <div class="benchmark-card" id="bm-good" style="background:#e6f4ea;color:#3a9a50">
+          <div class="benchmark-ratio">3× – 5×</div>
+          <div class="benchmark-label">Good</div>
+          <div class="benchmark-desc" style="color:#3a9a5099">Healthy unit economics. Focus on optimizing acquisition channels.</div>
+        </div>
+        <div class="benchmark-card" id="bm-fair" style="background:#fff3cd;color:#b87a00">
+          <div class="benchmark-ratio">1.5× – 3×</div>
+          <div class="benchmark-label">Fair</div>
+          <div class="benchmark-desc" style="color:#b87a0099">Room for improvement. Work on reducing CAC or increasing LTV.</div>
+        </div>
+        <div class="benchmark-card" id="bm-critical" style="background:#fde8e2;color:#c8440a">
+          <div class="benchmark-ratio">&lt;1.5×</div>
+          <div class="benchmark-label">Critical</div>
+          <div class="benchmark-desc" style="color:#c8440a99">Unsustainable. Immediate action required to improve unit economics.</div>
+        </div>
       </div>
-    </div>
-    <div class="field">
-      <label>Gross margin</label>
-      <div class="input-wrap">
-        <input type="number" id="margin" value="45" min="1" max="100" step="1" class="no-prefix" />
-        <span class="suffix">%</span>
+
+      <!-- Key metrics -->
+      <div class="results-grid" id="results"></div>
+
+      <!-- Verdict -->
+      <div class="verdict" id="verdict"></div>
+
+      <!-- Payback bar -->
+      <div class="payback-wrap">
+        <div class="payback-header">
+          <span class="payback-title">CAC payback period</span>
+          <span class="payback-val" id="payback-val">—</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="payback-bar"></div></div>
+        <div class="bar-markers"><span>0</span><span>6 mo</span><span>12 mo</span><span>18 mo</span><span>24 mo+</span></div>
       </div>
-      <span class="hint">After COGS, not after overhead</span>
-    </div>
-    <div class="field">
-      <label>Annual customer churn</label>
-      <div class="input-wrap">
-        <input type="number" id="churn" value="30" min="1" max="100" step="1" class="no-prefix" />
-        <span class="suffix">%</span>
+
+      <!-- LTV Projection chart -->
+      <div class="chart-wrap">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">↗ LTV Projection Timeline</div>
+            <div class="chart-sub">36-month lifetime value accumulation and CAC payback</div>
+          </div>
+          <div class="chart-milestones" id="milestones"></div>
+        </div>
+        <canvas id="ltv-chart"></canvas>
       </div>
-      <span class="hint">% of customers lost each year</span>
-    </div>
-    <div class="field">
-      <label>Customer acquisition cost</label>
-      <div class="input-wrap">
-        <span class="prefix">€</span>
-        <input type="number" id="cac" value="40" min="0" step="1" />
+
+      <!-- Sensitivity heatmap -->
+      <div class="heatmap-wrap">
+        <div class="heatmap-title">Sensitivity — LTV:CAC ratio</div>
+        <div class="heatmap-sub">Rows = annual churn ±pp · Columns = CAC ±% · Current scenario highlighted</div>
+        <div class="heatmap-scroll">
+          <table class="heatmap" id="heatmap"></table>
+        </div>
       </div>
-      <span class="hint">All-in: media + sales + ops</span>
-    </div>
-    <div class="field">
-      <label>Discount rate (optional)</label>
-      <div class="input-wrap">
-        <input type="number" id="discount" value="10" min="0" max="50" step="1" class="no-prefix" />
-        <span class="suffix">%</span>
-      </div>
-      <span class="hint">For discounted LTV (WACC or target)</span>
+
     </div>
   </div>
-
-  <hr class="divider" />
-
-  <!-- Key metrics -->
-  <div class="results" id="results"></div>
-
-  <!-- Verdict -->
-  <div class="verdict" id="verdict"></div>
-
-  <!-- Payback bar -->
-  <div class="payback-bar-wrap">
-    <div class="section-title">CAC payback period</div>
-    <div id="payback-label" style="font-family:'DM Mono',monospace;font-size:1rem;"></div>
-    <div class="bar-track">
-      <div class="bar-fill" id="payback-bar"></div>
-    </div>
-    <div class="bar-markers">
-      <span>0</span><span>6 mo</span><span>12 mo</span><span>18 mo</span><span>24 mo+</span>
-    </div>
-  </div>
-
-  <!-- Sensitivity heatmap -->
-  <div class="section-title">Sensitivity — LTV:CAC ratio</div>
-  <p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.8rem;">Rows = churn ±, Columns = CAC ±. Current values highlighted.</p>
-  <div class="heatmap-wrap">
-    <table class="heatmap" id="heatmap"></table>
-  </div>
-  <div class="axis-label">← lower CAC · higher CAC →</div>
 
   <div class="footnote">
-    <strong>Formulas used</strong><br/>
+    <strong>Formulas</strong><br/>
     Annual margin contribution = AOV × Frequency × Margin%<br/>
-    Avg. customer lifespan = 1 / Churn rate<br/>
-    LTV (undiscounted) = Contribution × Lifespan<br/>
-    LTV (discounted) = Contribution × [1 / (Churn + Discount rate)]<br/>
-    LTV:CAC = LTV / CAC<br/>
-    Payback = CAC / (Contribution / 12)
+    LTV (undiscounted) = Contribution / Churn<br/>
+    LTV (discounted) = Contribution / (Churn + Discount rate)<br/>
+    Blended CAC = Total annual acquisition cost / Annual new customers<br/>
+    Payback = months until cumulative survival-weighted LTV ≥ CAC
   </div>
 </div>
 
 <script>
-  const ids = ['aov','freq','margin','churn','cac','discount'];
-  ids.forEach(id => document.getElementById(id).addEventListener('input', update));
+  const inputIds = ['aov','freq','margin','churn','discount','media_spend','new_customers','sales_hc','sales_salary','ops_cost'];
+  inputIds.forEach(id => document.getElementById(id).addEventListener('input', update));
 
-  function calc(aov, freq, marginPct, churnPct, cac, discountPct) {
+  let chartInstance = null;
+
+  function getInputs() {
+    return {
+      aov:          +document.getElementById('aov').value || 0,
+      freq:         +document.getElementById('freq').value || 0,
+      marginPct:    +document.getElementById('margin').value || 0,
+      churnPct:     +document.getElementById('churn').value || 0,
+      discPct:      +document.getElementById('discount').value || 0,
+      media:        +document.getElementById('media_spend').value || 0,
+      newCust:      +document.getElementById('new_customers').value || 1,
+      salesHc:      +document.getElementById('sales_hc').value || 0,
+      salesSalary:  +document.getElementById('sales_salary').value || 0,
+      opsCost:      +document.getElementById('ops_cost').value || 0,
+    };
+  }
+
+  function computeCAC(i) {
+    const annualMedia = i.media * 12;
+    const annualSales = i.salesHc * i.salesSalary;
+    const annualOps   = i.opsCost * 12;
+    const totalCost   = annualMedia + annualSales + annualOps;
+    const annualNew   = i.newCust * 12;
+    return totalCost / annualNew;
+  }
+
+  function calcLTV(aov, freq, marginPct, churnPct, discPct) {
     const contribution = aov * freq * (marginPct / 100);
     const churn = churnPct / 100;
-    const discount = discountPct / 100;
+    const disc  = discPct / 100;
+    const ltv   = contribution / churn;
+    const ltv_d = contribution / (churn + disc);
     const lifespan = 1 / churn;
-    const ltv = contribution * lifespan;
-    const ltv_d = contribution / (churn + discount);
-    const ratio = ltv_d / cac;
-    const paybackMonths = cac / (contribution / 12);
-    return { contribution, lifespan, ltv, ltv_d, ratio, paybackMonths };
+    return { contribution, ltv, ltv_d, lifespan };
   }
 
   function fmt(n, dec=0) {
     return n.toLocaleString('en-GB', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-  }
-
-  function ratioColor(r) {
-    if (r >= 4) return { bg: '#d4edda', color: '#2a7a3b' };
-    if (r >= 2.5) return { bg: '#fff3cd', color: '#b87a00' };
-    return { bg: '#fde8e2', color: '#c8440a' };
   }
 
   function ratioBadge(r) {
@@ -460,38 +785,228 @@
     return { cls: 'bad', text: 'Unsustainable (<1.5×)' };
   }
 
-  function verdictText(r, payback, lifespan, ltv_d, cac) {
-    const b = ratioBadge(r);
-    let icon = r >= 3.5 ? '✓' : r >= 1.5 ? '⚠' : '✗';
-    let msg = '';
+  function ratioColor(r) {
+    if (r >= 4)   return { bg: '#d4edda', color: '#2a7a3b' };
+    if (r >= 2.5) return { bg: '#fff3cd', color: '#b87a00' };
+    return { bg: '#fde8e2', color: '#c8440a' };
+  }
 
-    if (r >= 5) {
-      msg = `Your unit economics are strong. LTV:CAC of <strong>${fmt(r,1)}×</strong> signals you can invest more in acquisition. Watch out for scaling traps — check if CAC inflates as you exhaust core channels.`;
-    } else if (r >= 3.5) {
-      msg = `Solid fundamentals. LTV:CAC of <strong>${fmt(r,1)}×</strong> is sustainable. Payback in <strong>${fmt(payback,1)} months</strong> gives you reasonable capital efficiency. Focus on reducing churn to push LTV further.`;
-    } else if (r >= 2.5) {
-      msg = `Viable but tight. LTV:CAC of <strong>${fmt(r,1)}×</strong> leaves limited margin for error. A churn spike or CAC increase could turn this negative fast. Prioritize retention programs.`;
-    } else if (r >= 1.5) {
-      msg = `Under pressure. At <strong>${fmt(r,1)}×</strong> you're recovering acquisition costs but barely creating value. Re-examine CAC by channel — blended CAC often hides a few expensive channels dragging the average up.`;
-    } else {
-      msg = `Unsustainable. LTV:CAC of <strong>${fmt(r,1)}×</strong> means you're destroying value with every acquisition. Do not scale. Either reduce CAC, increase ticket/frequency, or cut churn before spending more.`;
-    }
-
+  function verdictMsg(r, payback) {
+    const icon = r >= 3.5 ? '✓' : r >= 1.5 ? '⚠' : '✗';
+    let msg;
+    if (r >= 5)
+      msg = `Strong unit economics at <strong>${fmt(r,1)}×</strong>. You can invest more aggressively in acquisition. Watch for CAC inflation as you exhaust your core channels.`;
+    else if (r >= 3.5)
+      msg = `Solid at <strong>${fmt(r,1)}×</strong> with a ${fmt(payback,1)}-month payback. Sustainable growth posture — focus on reducing churn to push LTV further.`;
+    else if (r >= 2.5)
+      msg = `Viable but tight at <strong>${fmt(r,1)}×</strong>. Limited buffer if CAC spikes or churn worsens. Prioritize retention before scaling spend.`;
+    else if (r >= 1.5)
+      msg = `Under pressure at <strong>${fmt(r,1)}×</strong>. Blended CAC is likely being dragged up by expensive channels. Audit by channel before increasing budget.`;
+    else
+      msg = `Unsustainable at <strong>${fmt(r,1)}×</strong>. You're destroying value with every acquisition. Pause paid spend and fix the economics first.`;
     return { icon, msg };
   }
 
+  function buildChart(contribution, cac, paybackMonths) {
+    const months = Array.from({length: 37}, (_, i) => i);
+    const monthlyContrib = contribution / 12;
+
+    // Cumulative LTV — survival curve (churn decay), the correct model
+    const churnPct = +document.getElementById('churn').value / 100;
+    const monthlyChurn = 1 - Math.pow(1 - churnPct, 1/12);
+
+    const cumLTV = months.map(m => {
+      if (m === 0) return 0;
+      let val = 0;
+      for (let t = 1; t <= m; t++) {
+        const survival = Math.pow(1 - monthlyChurn, t - 1);
+        val += monthlyContrib * survival;
+      }
+      return val;
+    });
+
+    const monthlyVal = months.map(m => {
+      if (m === 0) return 0;
+      return monthlyContrib * Math.pow(1 - monthlyChurn, m - 1);
+    });
+
+    const cacLine = months.map(() => cac);
+
+    // Payback = first month where cumulative LTV >= CAC (curve-based, the source of truth)
+    // Use linear interpolation for fractional precision
+    let paybackExact = null;
+    for (let m = 1; m < cumLTV.length; m++) {
+      if (cumLTV[m] >= cac) {
+        const prev = cumLTV[m - 1];
+        const curr = cumLTV[m];
+        paybackExact = (m - 1) + (cac - prev) / (curr - prev);
+        break;
+      }
+    }
+    const paybackDisplay = paybackExact !== null ? fmt(paybackExact, 1) + ' mo' : '>36 mo';
+
+    // Milestones
+    const m12 = cumLTV[12] || 0;
+    const m24 = cumLTV[24] || 0;
+    const m36 = cumLTV[36] || 0;
+
+    document.getElementById('milestones').innerHTML = `
+      <div class="milestone"><div class="milestone-label">12-Mo LTV</div><div class="milestone-val">€${fmt(m12,1)}</div></div>
+      <div class="milestone"><div class="milestone-label">24-Mo LTV</div><div class="milestone-val">€${fmt(m24,1)}</div></div>
+      <div class="milestone"><div class="milestone-label">36-Mo LTV</div><div class="milestone-val highlight">€${fmt(m36,1)}</div></div>
+      <div class="milestone"><div class="milestone-label">Payback</div><div class="milestone-val">${paybackDisplay}</div></div>
+    `;
+
+    const labels = months.map(m => m === 0 ? 'M0' : `M${m}`);
+
+    if (chartInstance) chartInstance.destroy();
+
+    const ctx = document.getElementById('ltv-chart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Cumulative LTV',
+            data: cumLTV,
+            borderColor: '#2a7a3b',
+            backgroundColor: 'rgba(42,122,59,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            label: 'Monthly Value',
+            data: monthlyVal,
+            borderColor: '#b87a00',
+            backgroundColor: 'transparent',
+            fill: false,
+            tension: 0.4,
+            pointRadius: 0,
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+          },
+          {
+            label: 'CAC',
+            data: cacLine,
+            borderColor: '#c8440a',
+            backgroundColor: 'transparent',
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { family: 'IBM Plex Mono', size: 10 },
+              color: '#6b6b65',
+              boxWidth: 16,
+              padding: 16,
+            }
+          },
+          tooltip: {
+            backgroundColor: 'white',
+            borderColor: '#d4d2cb',
+            borderWidth: 1,
+            titleColor: '#1a1a18',
+            bodyColor: '#6b6b65',
+            titleFont: { family: 'IBM Plex Mono', size: 11 },
+            bodyFont: { family: 'IBM Plex Mono', size: 10 },
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: €${fmt(ctx.parsed.y, 0)}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { font: { family: 'IBM Plex Mono', size: 9 }, color: '#6b6b65', maxTicksLimit: 13 },
+            grid: { color: '#eceae4' }
+          },
+          y: {
+            ticks: {
+              font: { family: 'IBM Plex Mono', size: 9 }, color: '#6b6b65',
+              callback: v => '€' + fmt(v)
+            },
+            grid: { color: '#eceae4' }
+          }
+        }
+      }
+    });
+
+    return paybackExact;
+  }
+
   function update() {
-    const aov      = +document.getElementById('aov').value || 0;
-    const freq     = +document.getElementById('freq').value || 0;
-    const marginPct= +document.getElementById('margin').value || 0;
-    const churnPct = +document.getElementById('churn').value || 0;
-    const cac      = +document.getElementById('cac').value || 0;
-    const discPct  = +document.getElementById('discount').value || 0;
+    const i = getInputs();
+    if (!i.aov || !i.freq || !i.marginPct || !i.churnPct) return;
 
-    if (!aov || !freq || !marginPct || !churnPct || !cac) return;
-
-    const { contribution, lifespan, ltv, ltv_d, ratio, paybackMonths } = calc(aov, freq, marginPct, churnPct, cac, discPct);
+    const cac = computeCAC(i);
+    const { contribution, ltv, ltv_d, lifespan } = calcLTV(i.aov, i.freq, i.marginPct, i.churnPct, i.discPct);
+    const ratio = ltv_d / cac;
     const badge = ratioBadge(ratio);
+
+    // Chart builds the survival curve and returns the curve-based payback — single source of truth
+    const paybackMonths = buildChart(contribution, cac);
+    const paybackDisplay = paybackMonths !== null ? fmt(paybackMonths, 1) + ' mo' : '>36 mo';
+    const paybackNum = paybackMonths !== null ? paybackMonths : 999;
+
+    // Highlight active benchmark card
+    ['bm-excellent','bm-good','bm-fair','bm-critical'].forEach(id =>
+      document.getElementById(id).classList.remove('active-benchmark')
+    );
+    const activeBm = ratio >= 5 ? 'bm-excellent' : ratio >= 3 ? 'bm-good' : ratio >= 1.5 ? 'bm-fair' : 'bm-critical';
+    document.getElementById(activeBm).classList.add('active-benchmark');
+
+    // CAC display
+    document.getElementById('cac-display').textContent = `€${fmt(cac, 0)}`;
+
+    // CAC breakdown
+    const annualMedia = i.media * 12;
+    const annualSales = i.salesHc * i.salesSalary;
+    const annualOps   = i.opsCost * 12;
+    const totalCost   = annualMedia + annualSales + annualOps;
+    const annualNew   = i.newCust * 12;
+
+    const cacMedia = annualMedia / annualNew;
+    const cacSales = annualSales / annualNew;
+    const cacOps   = annualOps   / annualNew;
+
+    const pMedia = totalCost > 0 ? (annualMedia / totalCost * 100) : 0;
+    const pSales = totalCost > 0 ? (annualSales / totalCost * 100) : 0;
+    const pOps   = totalCost > 0 ? (annualOps   / totalCost * 100) : 0;
+
+    document.getElementById('bar-media').style.width = pMedia + '%';
+    document.getElementById('bar-sales').style.width = pSales + '%';
+    document.getElementById('bar-ops').style.width   = pOps   + '%';
+
+    const segments = [
+      { id: 'media', label: 'Media & advertising', color: '#c8440a', cac: cacMedia, pct: pMedia },
+      { id: 'sales', label: 'Sales team',           color: '#b87a00', cac: cacSales, pct: pSales },
+      { id: 'ops',   label: 'Ops & tools',          color: '#6b9e7a', cac: cacOps,   pct: pOps   },
+    ];
+
+    document.getElementById('cac-legend').innerHTML = segments.map(s => `
+      <div class="cac-legend-item">
+        <div class="cac-legend-left">
+          <div class="cac-legend-dot" style="background:${s.color}"></div>
+          <span class="cac-legend-label">${s.label}</span>
+        </div>
+        <div class="cac-legend-right">
+          <span>€${fmt(s.cac, 1)}</span>
+          <span class="cac-legend-pct">${fmt(s.pct, 1)}%</span>
+        </div>
+      </div>
+    `).join('');
 
     // Metrics
     document.getElementById('results').innerHTML = `
@@ -517,56 +1032,53 @@
       </div>
       <div class="metric">
         <div class="metric-label">CAC payback</div>
-        <div class="metric-value">${fmt(paybackMonths,1)} mo</div>
-        <div class="metric-sub">${paybackMonths <= 12 ? '✓ under 12 months' : paybackMonths <= 18 ? '~ marginal' : '✗ over 18 months'}</div>
+        <div class="metric-value">${paybackDisplay}</div>
+        <div class="metric-sub">${paybackNum <= 12 ? '✓ under 12 months' : paybackNum <= 18 ? '~ marginal' : '✗ over 18 months'}</div>
       </div>
       <div class="metric">
-        <div class="metric-label">Value created / €1 CAC</div>
+        <div class="metric-label">Value / €1 CAC</div>
         <div class="metric-value">€${fmt(ltv_d / cac, 2)}</div>
         <div class="metric-sub">above 1 = net positive</div>
       </div>
     `;
 
     // Verdict
-    const v = verdictText(ratio, paybackMonths, lifespan, ltv_d, cac);
-    document.getElementById('verdict').innerHTML = `
-      <div class="verdict-icon">${v.icon}</div>
-      <div class="verdict-text">${v.msg}</div>
-    `;
+    const v = verdictMsg(ratio, paybackNum);
+    document.getElementById('verdict').innerHTML = `<div class="verdict-icon">${v.icon}</div><div>${v.msg}</div>`;
 
     // Payback bar
-    const maxMonths = 24;
-    const pct = Math.min(paybackMonths / maxMonths * 100, 100);
-    const pbColor = paybackMonths <= 12 ? '#2a7a3b' : paybackMonths <= 18 ? '#b87a00' : '#c8440a';
-    document.getElementById('payback-label').textContent = `${fmt(paybackMonths,1)} months`;
+    const maxMo = 24;
+    const pct = Math.min(paybackNum / maxMo * 100, 100);
+    const pbColor = paybackNum <= 12 ? '#2a7a3b' : paybackNum <= 18 ? '#b87a00' : '#c8440a';
+    document.getElementById('payback-val').textContent = paybackDisplay;
     const bar = document.getElementById('payback-bar');
     bar.style.width = pct + '%';
     bar.style.background = pbColor;
 
-    // Sensitivity heatmap
+    // Heatmap
     const churnOffsets = [-10, -5, 0, +5, +10];
     const cacOffsets   = [-20, -10, 0, +10, +20];
 
     let html = '<thead><tr><th></th>';
     cacOffsets.forEach(co => {
-      const cacVal = Math.max(1, cac * (1 + co/100));
-      html += `<th>${co >= 0 ? '+' : ''}${co}%<br/><span style="font-weight:300">€${fmt(cacVal)}</span></th>`;
+      const cv = Math.max(1, cac * (1 + co/100));
+      html += `<th>${co >= 0 ? '+' : ''}${co}%<br/><span style="font-weight:300;font-size:0.65rem">€${fmt(cv)}</span></th>`;
     });
     html += '</tr></thead><tbody>';
 
     churnOffsets.forEach(ro => {
-      const churnVal = Math.max(1, churnPct + ro);
+      const churnVal = Math.max(1, i.churnPct + ro);
       html += `<tr><td class="row-header">${ro >= 0 ? '+' : ''}${ro}pp<br/>${fmt(churnVal)}%</td>`;
       cacOffsets.forEach(co => {
-        const cacVal = Math.max(1, cac * (1 + co/100));
-        const r2 = calc(aov, freq, marginPct, churnVal, cacVal, discPct).ratio;
+        const cv = Math.max(1, cac * (1 + co/100));
+        const { ltv_d: ld } = calcLTV(i.aov, i.freq, i.marginPct, churnVal, i.discPct);
+        const r2 = ld / cv;
         const c = ratioColor(r2);
         const isCurrent = ro === 0 && co === 0;
-        html += `<td style="background:${c.bg};color:${c.color};${isCurrent ? 'outline:2px solid var(--ink);font-weight:500;' : ''}">${fmt(r2,1)}×</td>`;
+        html += `<td style="background:${c.bg};color:${c.color};${isCurrent ? 'outline:2px solid var(--ink);font-weight:600;' : ''}">${fmt(r2,1)}×</td>`;
       });
       html += '</tr>';
     });
-
     html += '</tbody>';
     document.getElementById('heatmap').innerHTML = html;
   }
