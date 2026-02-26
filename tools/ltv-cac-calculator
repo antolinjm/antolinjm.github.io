@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LTV / CAC Calculator — antolinjm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --ink: #1a1a18;
+      --muted: #6b6b65;
+      --accent: #c8440a;
+      --border: #d4d2cb;
+      --card: #eeece7;
+      --good: #2a7a3b;
+      --warn: #b87a00;
+      --bad: #c8440a;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    a { color: var(--ink); }
+
+    header {
+      max-width: 760px;
+      margin: 0 auto 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .site-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--muted);
+    }
+    .site-name:hover { color: var(--ink); }
+
+    .main {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+      max-width: 520px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 560px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .prefix {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 0 0.5rem 0 0.75rem;
+      position: absolute;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .suffix {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      position: absolute;
+      right: 0.75rem;
+      pointer-events: none;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem 2rem 0.6rem 1.75rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"]:focus { border-color: var(--ink); }
+    input.no-prefix { padding-left: 0.75rem; }
+
+    .hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    /* Results */
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 560px) {
+      .results { grid-template-columns: 1fr 1fr; }
+    }
+
+    .metric {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+    }
+
+    .metric-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .metric-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      margin-top: 0.4rem;
+    }
+
+    .badge.good { background: #d4edda; color: var(--good); }
+    .badge.warn { background: #fff3cd; color: var(--warn); }
+    .badge.bad  { background: #fde8e2; color: var(--bad); }
+
+    /* Verdict bar */
+    .verdict {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .verdict-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+    .verdict-text {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    .verdict-text strong {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.83rem;
+    }
+
+    /* Sensitivity heatmap */
+    .section-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .heatmap-wrap {
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+
+    table.heatmap {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    table.heatmap th {
+      padding: 0.35rem 0.5rem;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    table.heatmap td {
+      padding: 0.35rem 0.5rem;
+      text-align: center;
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+
+    table.heatmap td.row-header {
+      color: var(--muted);
+      text-align: right;
+      padding-right: 0.8rem;
+    }
+
+    .axis-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.4rem;
+    }
+
+    /* Payback chart */
+    .payback-bar-wrap {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .bar-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 0.8rem 0 0.4rem;
+      position: relative;
+      overflow: visible;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      min-width: 4px;
+    }
+
+    .bar-markers {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .footnote {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .footnote strong {
+      font-family: 'DM Mono', monospace;
+      font-weight: 500;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="site-name" href="/">← antolinjm</a>
+  <span class="site-name">tools / ltv-cac</span>
+</header>
+
+<div class="main">
+  <h1>LTV / CAC Calculator</h1>
+  <p class="subtitle">Retail & subscription unit economics. Margin-adjusted LTV, payback period, and sensitivity analysis across churn and acquisition cost scenarios.</p>
+
+  <!-- Inputs -->
+  <div class="grid">
+    <div class="field">
+      <label>Avg. ticket / order value</label>
+      <div class="input-wrap">
+        <span class="prefix">€</span>
+        <input type="number" id="aov" value="65" min="0" step="1" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Purchase frequency (per year)</label>
+      <div class="input-wrap">
+        <input type="number" id="freq" value="4" min="0.1" step="0.5" class="no-prefix" />
+        <span class="suffix">×/yr</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Gross margin</label>
+      <div class="input-wrap">
+        <input type="number" id="margin" value="45" min="1" max="100" step="1" class="no-prefix" />
+        <span class="suffix">%</span>
+      </div>
+      <span class="hint">After COGS, not after overhead</span>
+    </div>
+    <div class="field">
+      <label>Annual customer churn</label>
+      <div class="input-wrap">
+        <input type="number" id="churn" value="30" min="1" max="100" step="1" class="no-prefix" />
+        <span class="suffix">%</span>
+      </div>
+      <span class="hint">% of customers lost each year</span>
+    </div>
+    <div class="field">
+      <label>Customer acquisition cost</label>
+      <div class="input-wrap">
+        <span class="prefix">€</span>
+        <input type="number" id="cac" value="40" min="0" step="1" />
+      </div>
+      <span class="hint">All-in: media + sales + ops</span>
+    </div>
+    <div class="field">
+      <label>Discount rate (optional)</label>
+      <div class="input-wrap">
+        <input type="number" id="discount" value="10" min="0" max="50" step="1" class="no-prefix" />
+        <span class="suffix">%</span>
+      </div>
+      <span class="hint">For discounted LTV (WACC or target)</span>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Key metrics -->
+  <div class="results" id="results"></div>
+
+  <!-- Verdict -->
+  <div class="verdict" id="verdict"></div>
+
+  <!-- Payback bar -->
+  <div class="payback-bar-wrap">
+    <div class="section-title">CAC payback period</div>
+    <div id="payback-label" style="font-family:'DM Mono',monospace;font-size:1rem;"></div>
+    <div class="bar-track">
+      <div class="bar-fill" id="payback-bar"></div>
+    </div>
+    <div class="bar-markers">
+      <span>0</span><span>6 mo</span><span>12 mo</span><span>18 mo</span><span>24 mo+</span>
+    </div>
+  </div>
+
+  <!-- Sensitivity heatmap -->
+  <div class="section-title">Sensitivity — LTV:CAC ratio</div>
+  <p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.8rem;">Rows = churn ±, Columns = CAC ±. Current values highlighted.</p>
+  <div class="heatmap-wrap">
+    <table class="heatmap" id="heatmap"></table>
+  </div>
+  <div class="axis-label">← lower CAC · higher CAC →</div>
+
+  <div class="footnote">
+    <strong>Formulas used</strong><br/>
+    Annual margin contribution = AOV × Frequency × Margin%<br/>
+    Avg. customer lifespan = 1 / Churn rate<br/>
+    LTV (undiscounted) = Contribution × Lifespan<br/>
+    LTV (discounted) = Contribution × [1 / (Churn + Discount rate)]<br/>
+    LTV:CAC = LTV / CAC<br/>
+    Payback = CAC / (Contribution / 12)
+  </div>
+</div>
+
+<script>
+  const ids = ['aov','freq','margin','churn','cac','discount'];
+  ids.forEach(id => document.getElementById(id).addEventListener('input', update));
+
+  function calc(aov, freq, marginPct, churnPct, cac, discountPct) {
+    const contribution = aov * freq * (marginPct / 100);
+    const churn = churnPct / 100;
+    const discount = discountPct / 100;
+    const lifespan = 1 / churn;
+    const ltv = contribution * lifespan;
+    const ltv_d = contribution / (churn + discount);
+    const ratio = ltv_d / cac;
+    const paybackMonths = cac / (contribution / 12);
+    return { contribution, lifespan, ltv, ltv_d, ratio, paybackMonths };
+  }
+
+  function fmt(n, dec=0) {
+    return n.toLocaleString('en-GB', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+
+  function ratioColor(r) {
+    if (r >= 4) return { bg: '#d4edda', color: '#2a7a3b' };
+    if (r >= 2.5) return { bg: '#fff3cd', color: '#b87a00' };
+    return { bg: '#fde8e2', color: '#c8440a' };
+  }
+
+  function ratioBadge(r) {
+    if (r >= 5)   return { cls: 'good', text: 'Excellent (≥5×)' };
+    if (r >= 3.5) return { cls: 'good', text: 'Healthy (3.5–5×)' };
+    if (r >= 2.5) return { cls: 'warn', text: 'Acceptable (2.5–3.5×)' };
+    if (r >= 1.5) return { cls: 'warn', text: 'Tight (1.5–2.5×)' };
+    return { cls: 'bad', text: 'Unsustainable (<1.5×)' };
+  }
+
+  function verdictText(r, payback, lifespan, ltv_d, cac) {
+    const b = ratioBadge(r);
+    let icon = r >= 3.5 ? '✓' : r >= 1.5 ? '⚠' : '✗';
+    let msg = '';
+
+    if (r >= 5) {
+      msg = `Your unit economics are strong. LTV:CAC of <strong>${fmt(r,1)}×</strong> signals you can invest more in acquisition. Watch out for scaling traps — check if CAC inflates as you exhaust core channels.`;
+    } else if (r >= 3.5) {
+      msg = `Solid fundamentals. LTV:CAC of <strong>${fmt(r,1)}×</strong> is sustainable. Payback in <strong>${fmt(payback,1)} months</strong> gives you reasonable capital efficiency. Focus on reducing churn to push LTV further.`;
+    } else if (r >= 2.5) {
+      msg = `Viable but tight. LTV:CAC of <strong>${fmt(r,1)}×</strong> leaves limited margin for error. A churn spike or CAC increase could turn this negative fast. Prioritize retention programs.`;
+    } else if (r >= 1.5) {
+      msg = `Under pressure. At <strong>${fmt(r,1)}×</strong> you're recovering acquisition costs but barely creating value. Re-examine CAC by channel — blended CAC often hides a few expensive channels dragging the average up.`;
+    } else {
+      msg = `Unsustainable. LTV:CAC of <strong>${fmt(r,1)}×</strong> means you're destroying value with every acquisition. Do not scale. Either reduce CAC, increase ticket/frequency, or cut churn before spending more.`;
+    }
+
+    return { icon, msg };
+  }
+
+  function update() {
+    const aov      = +document.getElementById('aov').value || 0;
+    const freq     = +document.getElementById('freq').value || 0;
+    const marginPct= +document.getElementById('margin').value || 0;
+    const churnPct = +document.getElementById('churn').value || 0;
+    const cac      = +document.getElementById('cac').value || 0;
+    const discPct  = +document.getElementById('discount').value || 0;
+
+    if (!aov || !freq || !marginPct || !churnPct || !cac) return;
+
+    const { contribution, lifespan, ltv, ltv_d, ratio, paybackMonths } = calc(aov, freq, marginPct, churnPct, cac, discPct);
+    const badge = ratioBadge(ratio);
+
+    // Metrics
+    document.getElementById('results').innerHTML = `
+      <div class="metric">
+        <div class="metric-label">Annual contribution</div>
+        <div class="metric-value">€${fmt(contribution)}</div>
+        <div class="metric-sub">per active customer</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">LTV (discounted)</div>
+        <div class="metric-value">€${fmt(ltv_d)}</div>
+        <div class="metric-sub">undiscounted: €${fmt(ltv)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">LTV : CAC</div>
+        <div class="metric-value">${fmt(ratio,1)}×</div>
+        <span class="badge ${badge.cls}">${badge.text}</span>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Avg. lifespan</div>
+        <div class="metric-value">${fmt(lifespan,1)} yr</div>
+        <div class="metric-sub">${fmt(lifespan * 12, 0)} months</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">CAC payback</div>
+        <div class="metric-value">${fmt(paybackMonths,1)} mo</div>
+        <div class="metric-sub">${paybackMonths <= 12 ? '✓ under 12 months' : paybackMonths <= 18 ? '~ marginal' : '✗ over 18 months'}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Value created / €1 CAC</div>
+        <div class="metric-value">€${fmt(ltv_d / cac, 2)}</div>
+        <div class="metric-sub">above 1 = net positive</div>
+      </div>
+    `;
+
+    // Verdict
+    const v = verdictText(ratio, paybackMonths, lifespan, ltv_d, cac);
+    document.getElementById('verdict').innerHTML = `
+      <div class="verdict-icon">${v.icon}</div>
+      <div class="verdict-text">${v.msg}</div>
+    `;
+
+    // Payback bar
+    const maxMonths = 24;
+    const pct = Math.min(paybackMonths / maxMonths * 100, 100);
+    const pbColor = paybackMonths <= 12 ? '#2a7a3b' : paybackMonths <= 18 ? '#b87a00' : '#c8440a';
+    document.getElementById('payback-label').textContent = `${fmt(paybackMonths,1)} months`;
+    const bar = document.getElementById('payback-bar');
+    bar.style.width = pct + '%';
+    bar.style.background = pbColor;
+
+    // Sensitivity heatmap
+    const churnOffsets = [-10, -5, 0, +5, +10];
+    const cacOffsets   = [-20, -10, 0, +10, +20];
+
+    let html = '<thead><tr><th></th>';
+    cacOffsets.forEach(co => {
+      const cacVal = Math.max(1, cac * (1 + co/100));
+      html += `<th>${co >= 0 ? '+' : ''}${co}%<br/><span style="font-weight:300">€${fmt(cacVal)}</span></th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    churnOffsets.forEach(ro => {
+      const churnVal = Math.max(1, churnPct + ro);
+      html += `<tr><td class="row-header">${ro >= 0 ? '+' : ''}${ro}pp<br/>${fmt(churnVal)}%</td>`;
+      cacOffsets.forEach(co => {
+        const cacVal = Math.max(1, cac * (1 + co/100));
+        const r2 = calc(aov, freq, marginPct, churnVal, cacVal, discPct).ratio;
+        const c = ratioColor(r2);
+        const isCurrent = ro === 0 && co === 0;
+        html += `<td style="background:${c.bg};color:${c.color};${isCurrent ? 'outline:2px solid var(--ink);font-weight:500;' : ''}">${fmt(r2,1)}×</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody>';
+    document.getElementById('heatmap').innerHTML = html;
+  }
+
+  update();
+</script>
+</body>
+</html>
