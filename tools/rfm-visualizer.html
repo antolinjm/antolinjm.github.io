@@ -32,50 +32,76 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  overflow: hidden;
-}
-
-/* ── LAYOUT ────────────────────────────────────────────── */
-.app {
-  display: grid;
-  grid-template-rows: 44px 1fr 148px;
-  grid-template-columns: 1fr 272px;
-  grid-template-areas:
-    "hdr  hdr"
-    "viz  side"
-    "defs side";
-  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* ── HEADER ────────────────────────────────────────────── */
-header {
-  grid-area: hdr;
-  border-bottom: 1px solid var(--border);
+.app {
+  display: grid;
+  grid-template-rows: 36px 72px 1fr 190px;
+  grid-template-columns: 1fr 272px;
+  grid-template-areas:
+    "nav   nav"
+    "ttl   ttl"
+    "viz   side"
+    "defs  side";
+  height: 100vh;
+  min-height: 500px;
+}
+
+nav {
+  grid-area: nav;
   display: flex;
   align-items: center;
-  padding: 0 1.4rem;
-  gap: 1.6rem;
+  justify-content: space-between;
+  padding: 0 1.8rem;
+  border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
 
-.hdr-crumb {
-  font-size: 0.65rem;
+.nav-back {
+  font-family: var(--font);
+  font-size: 0.72rem;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.nav-back:hover { color: var(--text); }
+
+.nav-crumb {
+  font-family: var(--font);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
 }
 
-header h1 {
-  font-family: var(--font-head);
-  font-size: 1rem;
-  font-weight: 800;
+.page-title {
+  grid-area: ttl;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1.8rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-title h1 {
+  font-family: var(--font);
+  font-size: 1.5rem;
+  font-weight: 400;
   color: var(--text);
   letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-.hdr-sub {
-  font-size: 0.62rem;
+.page-title .sub {
+  font-family: var(--font);
+  font-size: 0.72rem;
   color: var(--muted);
-  letter-spacing: 0.04em;
+  margin-top: 0.2rem;
+  letter-spacing: 0.01em;
 }
 
 /* ── VIZ ───────────────────────────────────────────────── */
@@ -101,69 +127,83 @@ header h1 {
 
 .dc {
   flex: 1;
-  min-width: 110px;
-  padding: 0.65rem 0.8rem;
+  min-width: 120px;
+  padding: 0.7rem 0.85rem;
   border-right: 1px solid var(--border);
   cursor: pointer;
   transition: background 0.12s;
+  border-top: 2px solid transparent;
 }
 .dc:last-child { border-right: none; }
-.dc:hover, .dc.hi { background: var(--card); }
+.dc:hover, .dc.hi { background: var(--card); border-top-color: var(--border2); }
 
 .dc-head {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 
 .dc-name {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: var(--text);
 }
 
 .dc-n {
   margin-left: auto;
   font-family: var(--font-head);
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 800;
+  color: var(--text);
 }
 
-.dc-pills {
+.dc-rules {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.18rem;
-  margin-bottom: 0.28rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.4rem;
 }
 
-.xpill {
-  font-size: 0.54rem;
+.dc-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+}
+
+.dc-rule-key {
+  color: var(--muted);
+  font-weight: 500;
+  min-width: 14px;
+  letter-spacing: 0.04em;
+}
+
+.rpill {
+  font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  padding: 0.06rem 0.32rem;
+  padding: 0.05rem 0.3rem;
   border-radius: 2px;
-  color: #fff;
-}
-.xpill.any {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--muted);
-}
-.xpill.lbl {
-  background: none;
-  color: var(--muted);
-  font-size: 0.52rem;
-  padding: 0;
-  font-weight: 500;
+  background: var(--dim);
+  color: var(--text);
 }
 
+.rpill.hot  { background: #dcfce7; color: #15803d; }
+.rpill.warm { background: #fef3c7; color: #a16207; }
+.rpill.cold { background: #fee2e2; color: #dc2626; }
+.rpill.freq { background: #ede9fe; color: #6d28d9; }
+.rpill.high { background: #fef3c7; color: #92400e; }
+.rpill.mid  { background: #dbeafe; color: #1d4ed8; }
+.rpill.any  { background: none; border: 1px solid var(--border2); color: var(--muted); }
+.rpill.new7 { background: #f3e8ff; color: #7c3aed; }
+
 .dc-desc {
-  font-size: 0.58rem;
+  font-size: 0.66rem;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 /* ── SIDEBAR ───────────────────────────────────────────── */
@@ -179,33 +219,33 @@ header h1 {
 }
 
 .ss {
-  padding: 0.9rem 1.1rem;
+  padding: 1rem 1.2rem;
   border-bottom: 1px solid var(--border);
 }
 
 .st {
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.75rem;
 }
 
 /* band strip */
 .bstrip {
   display: flex;
-  height: 22px;
+  height: 24px;
   border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--border);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.7rem;
 }
 .bseg {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.54rem;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   color: #fff;
@@ -218,15 +258,15 @@ header h1 {
 /* dual slider */
 .dslider {
   position: relative;
-  height: 22px;
+  height: 28px;
   display: flex;
   align-items: center;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.5rem;
 }
 .dtrack {
   position: absolute;
   width: 100%;
-  height: 2px;
+  height: 3px;
   background: var(--border2);
   border-radius: 2px;
 }
@@ -234,7 +274,7 @@ header h1 {
   -webkit-appearance: none;
   position: absolute;
   width: 100%;
-  height: 2px;
+  height: 3px;
   background: transparent;
   outline: none;
   cursor: pointer;
@@ -243,29 +283,49 @@ header h1 {
 .dslider input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   pointer-events: all;
-  width: 14px; height: 14px;
+  width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--text);
-  border: 2px solid var(--bg);
+  border: 2.5px solid var(--bg);
   cursor: grab;
   transition: transform 0.1s;
-  box-shadow: 0 1px 4px #0002;
+  box-shadow: 0 1px 5px #0003;
 }
-.dslider input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.dslider input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
 
-.bvals {
+/* slider threshold labels — shown below each handle */
+.slider-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.58rem;
-  color: var(--muted);
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+  position: relative;
 }
-.bv {
-  background: var(--dim);
+.slider-label-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.slider-label-arrow {
+  font-size: 0.6rem;
+  color: var(--muted);
+  line-height: 1;
+}
+.slider-label-val {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--text);
-  padding: 0.08rem 0.38rem;
+  background: var(--dim);
+  padding: 0.12rem 0.45rem;
   border-radius: 2px;
-  font-size: 0.62rem;
-  font-weight: 500;
+  white-space: nowrap;
+}
+.slider-label-desc {
+  font-size: 0.6rem;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 /* single slider */
@@ -275,14 +335,14 @@ header h1 {
   align-items: center;
   margin-bottom: 0.5rem;
 }
-.slbl { font-size: 0.65rem; color: var(--text); }
+.slbl { font-size: 0.72rem; color: var(--text); }
 .sval {
   font-family: var(--font-head);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text);
   background: var(--dim);
-  padding: 0.1rem 0.45rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 2px;
 }
 input[type=range].single {
@@ -305,33 +365,33 @@ input[type=range].single::-webkit-slider-thumb {
   cursor: pointer;
 }
 input[type=range].single::-webkit-slider-thumb:hover { transform: scale(1.2); }
-.bend { display: flex; justify-content: space-between; font-size: 0.56rem; color: var(--muted); margin-top: 0.3rem; }
+.bend { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--muted); margin-top: 0.3rem; }
 
 /* encoding key */
-.ekey { display: flex; flex-direction: column; gap: 0.45rem; }
-.erow { display: flex; align-items: center; gap: 0.55rem; font-size: 0.65rem; color: var(--muted); }
+.ekey { display: flex; flex-direction: column; gap: 0.5rem; }
+.erow { display: flex; align-items: center; gap: 0.55rem; font-size: 0.72rem; color: var(--muted); }
 .erow strong { color: var(--text); font-weight: 600; }
-.rcols { display: flex; gap: 0.6rem; margin-top: 0.3rem; flex-wrap: wrap; }
-.rcoli { display: flex; align-items: center; gap: 0.28rem; font-size: 0.6rem; color: var(--muted); }
-.rdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.rcols { display: flex; gap: 0.6rem; margin-top: 0.35rem; flex-wrap: wrap; }
+.rcoli { display: flex; align-items: center; gap: 0.3rem; font-size: 0.67rem; color: var(--muted); }
+.rdot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
 /* stats */
 .sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
-.sbox { background: var(--dim); border-radius: 2px; padding: 0.5rem 0.55rem; }
-.slb { font-size: 0.56rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.svl { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--text); margin-top: 0.08rem; }
+.sbox { background: var(--dim); border-radius: 2px; padding: 0.55rem 0.6rem; }
+.slb { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.svl { font-family: var(--font-head); font-size: 1.1rem; font-weight: 800; color: var(--text); margin-top: 0.1rem; }
 
 /* reshuffle */
 .rbtn {
   display: block;
   width: calc(100% - 2.2rem);
   margin: 0.8rem 1.1rem;
-  padding: 0.55rem;
+  padding: 0.6rem;
   background: transparent;
   border: 1px solid var(--border2);
   color: var(--muted);
   font-family: var(--font);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
@@ -343,34 +403,205 @@ input[type=range].single::-webkit-slider-thumb:hover { transform: scale(1.2); }
 /* ── TOOLTIP ───────────────────────────────────────────── */
 .tt {
   position: fixed;
-  background: #1a1a18f5;
-  border: 1px solid #333;
-  padding: 0.6rem 0.85rem;
+  background: #ffffffe8;
+  border: 1px solid var(--border2);
+  padding: 0.65rem 0.9rem;
   border-radius: 3px;
   font-family: var(--font);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
   pointer-events: none;
   z-index: 300;
-  min-width: 158px;
+  min-width: 168px;
   opacity: 0;
   transition: opacity 0.1s;
+  box-shadow: 0 4px 16px #0000000f;
+  backdrop-filter: blur(4px);
 }
 .tt.on { opacity: 1; }
-.tt-name { font-family: var(--font-head); font-size: 0.74rem; font-weight: 700; color: #fff; margin-bottom: 0.38rem; }
-.tt-row { display: flex; justify-content: space-between; gap: 0.7rem; color: #888; margin-top: 0.13rem; align-items: center; }
-.tt-row span:last-child { color: #ddd; }
-.tt-seg { margin-top: 0.42rem; font-size: 0.66rem; font-weight: 600; }
-.tpill { font-size: 0.56rem; padding: 0.05rem 0.32rem; border-radius: 2px; font-weight: 700; color: #fff; }
+.tt-name { font-family: var(--font-head); font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.tt-row { display: flex; justify-content: space-between; gap: 0.7rem; color: var(--muted); margin-top: 0.15rem; align-items: center; }
+.tt-row span:last-child { color: var(--text); }
+.tt-seg { margin-top: 0.45rem; font-size: 0.72rem; font-weight: 600; }
+.tpill { font-size: 0.62rem; padding: 0.06rem 0.35rem; border-radius: 2px; font-weight: 700; color: #fff; }
+/* ── EXPLAINER ──────────────────────────────────────────── */
+.explainer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 3rem 2rem 4rem;
+}
+
+.ex-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.ex-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.ex-title {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+  line-height: 1.2;
+}
+
+.ex-lead {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 2rem;
+  max-width: 640px;
+}
+
+.ex-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.ex-card {
+  background: var(--bg);
+  padding: 1.2rem 1.3rem;
+}
+
+.ex-card-label {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.ex-card-letter {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.ex-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.ex-card-body {
+  font-size: 0.74rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.ex-card-example {
+  margin-top: 0.6rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+  border-left: 2px solid var(--border2);
+  padding-left: 0.6rem;
+  line-height: 1.5;
+}
+
+.ex-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.ex-h2 {
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.7rem;
+}
+
+.ex-p {
+  font-size: 0.78rem;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  max-width: 680px;
+}
+
+.ex-seg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+  margin-top: 1rem;
+}
+
+.ex-seg-table th {
+  text-align: left;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ex-seg-table td {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ex-seg-table td:first-child {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ex-seg-table tr:last-child td { border-bottom: none; }
+
+.ex-formula {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+  font-size: 0.68rem;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.ex-formula strong { color: var(--text); font-weight: 600; }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <header>
-    <span class="hdr-crumb">tools / rfm</span>
+  <nav>
+    <a class="nav-back" href="/">← antolinjm</a>
+    <span class="nav-crumb">tools / rfm</span>
+  </nav>
+
+  <div class="page-title">
     <h1>RFM Segmentation</h1>
-    <span class="hdr-sub">100 synthetic customers · live clustering</span>
-  </header>
+    <span class="sub">Recency, Frequency, Monetary — 100 synthetic customers, live clustering.</span>
+  </div>
 
   <div class="viz"><canvas id="rfm"></canvas></div>
 
@@ -389,9 +620,15 @@ input[type=range].single::-webkit-slider-thumb:hover { transform: scale(1.2); }
         <input type="range" id="r-lo" min="1" max="363" value="30">
         <input type="range" id="r-hi" min="2" max="364" value="90">
       </div>
-      <div class="bvals">
-        <div>warm → hot: <span class="bv" id="r-lo-v">30</span>d</div>
-        <div>cold → warm: <span class="bv" id="r-hi-v">90</span>d</div>
+      <div class="slider-labels">
+        <div class="slider-label-item">
+          <span class="slider-label-desc">warm → hot</span>
+          <span class="slider-label-val" id="r-lo-v">30d</span>
+        </div>
+        <div class="slider-label-item">
+          <span class="slider-label-desc">cold → warm</span>
+          <span class="slider-label-val" id="r-hi-v">90d</span>
+        </div>
       </div>
     </div>
 
@@ -407,9 +644,15 @@ input[type=range].single::-webkit-slider-thumb:hover { transform: scale(1.2); }
         <input type="range" id="m-lo" min="0" max="1990" step="10" value="100">
         <input type="range" id="m-hi" min="10" max="2000" step="10" value="500">
       </div>
-      <div class="bvals">
-        <div>low → mid: <span class="bv" id="m-lo-v">100</span> €</div>
-        <div>mid → high: <span class="bv" id="m-hi-v">500</span> €</div>
+      <div class="slider-labels">
+        <div class="slider-label-item">
+          <span class="slider-label-desc">low → mid</span>
+          <span class="slider-label-val" id="m-lo-v">€100</span>
+        </div>
+        <div class="slider-label-item">
+          <span class="slider-label-desc">mid → high</span>
+          <span class="slider-label-val" id="m-hi-v">€500</span>
+        </div>
       </div>
     </div>
 
@@ -457,6 +700,92 @@ input[type=range].single::-webkit-slider-thumb:hover { transform: scale(1.2); }
     <button class="rbtn" id="reshuffle">↺ &nbsp;reshuffle customers</button>
   </div>
 </div>
+
+<!-- ── EXPLAINER ─────────────────────────────────────── -->
+<section class="explainer">
+  <div class="ex-inner">
+
+    <div class="ex-label">Methodology</div>
+    <h2 class="ex-title">What is RFM Segmentation?</h2>
+    <p class="ex-lead">RFM is a behavior-based framework for ranking and grouping customers by how recently they bought, how often they buy, and how much they spend. It turns raw transaction data into actionable segments — no machine learning required.</p>
+
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ex-card-label">Dimension 1</div>
+        <div class="ex-card-letter">R</div>
+        <div class="ex-card-title">Recency</div>
+        <div class="ex-card-body">Days since the customer's last purchase. The most predictive single metric — a customer who bought yesterday is far more likely to buy again than one who bought a year ago.</div>
+        <div class="ex-card-example">In this tool: HOT ≤ 30d · WARM ≤ 90d · COLD > 90d (adjustable)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-card-label">Dimension 2</div>
+        <div class="ex-card-letter">F</div>
+        <div class="ex-card-title">Frequency</div>
+        <div class="ex-card-body">Number of purchases per month. High-frequency customers have stronger habits, higher switching costs, and better LTV predictability. It signals loyalty even when recency dips.</div>
+        <div class="ex-card-example">In this tool: a binary threshold separates "frequent" from "infrequent" (adjustable)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-card-label">Dimension 3</div>
+        <div class="ex-card-letter">M</div>
+        <div class="ex-card-title">Monetary</div>
+        <div class="ex-card-body">Average monthly spend in €. Monetary value drives prioritization — a Champions customer spending €1,500/mo deserves a different retention investment than one spending €50/mo.</div>
+        <div class="ex-card-example">In this tool: LOW · MID · HIGH bands (adjustable) · dot size encodes spend visually</div>
+      </div>
+    </div>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Why it matters in retail</h3>
+    <p class="ex-p">Not all customers deserve the same marketing investment. RFM lets you concentrate budget where it generates the highest return — retaining Champions, reactivating At Risk customers before they churn, and converting Promising customers before they cool off. A company spending the same on a Lost customer as a Loyal one is burning margin.</p>
+    <p class="ex-p">The framework is deliberately simple — which is a feature, not a bug. It works with a single transactions table, runs in SQL in minutes, and produces segments that any team can understand and act on without a data science degree.</p>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Segment reference</h3>
+    <table class="ex-seg-table">
+      <thead>
+        <tr>
+          <th>Segment</th>
+          <th>Definition</th>
+          <th>Recommended action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Champions</td><td>HOT · frequent · HIGH spend</td><td>Loyalty rewards, early access, referral programs. Don't over-discount — they already love you.</td></tr>
+        <tr><td>Loyal</td><td>HOT · frequent · MID or LOW spend</td><td>Upsell to higher-value products. Cross-sell adjacent categories. Increase basket size.</td></tr>
+        <tr><td>Potential</td><td>HOT · infrequent · MID or HIGH spend</td><td>Trigger repurchase with email sequences. Subscription offers. Show what they're missing.</td></tr>
+        <tr><td>New</td><td>First purchase ≤ 7 days ago</td><td>Onboarding is critical. First 30 days determine long-term retention. Welcome series + second-purchase incentive.</td></tr>
+        <tr><td>Promising</td><td>WARM recency · any F/M</td><td>Re-engage before going cold. Personalized nudge, limited-time offer, recommendation based on past behavior.</td></tr>
+        <tr><td>At Risk</td><td>WARM recency · frequent (historically)</td><td>Highest urgency. Were loyal, now drifting. Direct outreach, win-back campaign, ask why they stopped.</td></tr>
+        <tr><td>Lost</td><td>COLD recency (any F/M)</td><td>Low ROI. Test win-back with a strong offer on a random subset. If no response, suppress from active campaigns.</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">How to score in SQL</h3>
+    <p class="ex-p">RFM scoring requires only a standard orders table with three columns: customer_id, order_date, order_value.</p>
+    <div class="ex-formula">
+      <strong>-- Step 1: compute raw RFM values per customer</strong><br>
+      SELECT customer_id,<br>
+      &nbsp;&nbsp;DATEDIFF(CURRENT_DATE, MAX(order_date)) AS recency_days,<br>
+      &nbsp;&nbsp;COUNT(*) / NULLIF(DATEDIFF(MAX(order_date), MIN(order_date)) / 30.0, 0) AS freq_per_month,<br>
+      &nbsp;&nbsp;SUM(order_value) / NULLIF(COUNT(DISTINCT DATE_FORMAT(order_date,'%Y-%m')), 0) AS spend_per_month<br>
+      FROM orders GROUP BY customer_id;<br><br>
+      <strong>-- Step 2: assign bands then map to segments</strong><br>
+      CASE<br>
+      &nbsp;&nbsp;WHEN recency_days &gt; :cold_threshold THEN 'lost'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= 7 THEN 'new'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= :hot_threshold AND freq_per_month &gt;= :freq_th AND spend_per_month &gt; :m_high THEN 'champions'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= :hot_threshold AND freq_per_month &gt;= :freq_th THEN 'loyal'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= :hot_threshold THEN 'potential'<br>
+      &nbsp;&nbsp;WHEN freq_per_month &gt;= :freq_th THEN 'at_risk'<br>
+      &nbsp;&nbsp;ELSE 'promising'<br>
+      END AS segment
+    </div>
+
+  </div>
+</section>
 
 <div class="tt" id="tt">
   <div class="tt-name" id="tt-nm"></div>
@@ -605,9 +934,9 @@ function classify(c){
 // ═══════════════════════════════════════════════════════════
 const cv  = document.getElementById('rfm');
 const ctx = cv.getContext('2d');
-const PAD = 40;
+const PAD = 64;  // wider left pad to fit rotated row labels
 let hIdx=-1, hSeg=null, raf;
-const K=0.07, DMP=0.76;
+const K=0.022, DMP=0.5;  // gentler spring — less shuffly
 
 function boxPx(){
   const W=cv.width, H=cv.height;
@@ -762,12 +1091,12 @@ function tick(){
 
   // ── Column zone labels (bottom axis) ─────────────────
   const zones=[
-    { t:`COLD  (>${rHi}d)`,         c:'#dc262688' },
-    { t:`WARM  (${rLo}–${rHi}d)`,   c:'#d9770688' },
-    { t:`HOT  (≤${rLo}d) · INFREQ`, c:'#16a34a88' },
-    { t:`HOT  (≤${rLo}d) · FREQ`,   c:'#16a34a88' },
+    { t:`COLD  (>${rHi}d)`,         c:'#dc2626cc' },
+    { t:`WARM  (${rLo}–${rHi}d)`,   c:'#d97706cc' },
+    { t:`HOT  (≤${rLo}d) · INFREQ`, c:'#16a34acc' },
+    { t:`HOT  (≤${rLo}d) · FREQ`,   c:'#16a34acc' },
   ];
-  ctx.font='500 10px IBM Plex Mono, monospace';
+  ctx.font='600 11px IBM Plex Mono, monospace';
   ctx.textAlign='center';
   [0,1,2,3].forEach(col=>{
     const ccx=PAD+col*cW+cW/2;
@@ -775,13 +1104,17 @@ function tick(){
     ctx.fillText(zones[col].t, ccx, H-10);
   });
 
-  // ── Row labels (left axis) ────────────────────────────
-  const rlbls=['TOP FREQ','MID FREQ','LOW FREQ'];
-  ctx.font='500 9px IBM Plex Mono, monospace';
-  ctx.textAlign='right';
-  [0,1,2].forEach(row=>{
-    ctx.fillStyle='#bbb';
-    ctx.fillText(rlbls[row], PAD-5, PAD+row*rH+rH/2+4);
+  // ── Row labels (left axis) — rotated vertically ───────
+  ctx.font='600 11px IBM Plex Mono, monospace';
+  ctx.fillStyle='#555550';
+  ctx.textAlign='center';
+  ['HIGH FREQ','MID FREQ','LOW FREQ'].forEach((lbl,row)=>{
+    const cy=PAD+row*rH+rH/2;
+    ctx.save();
+    ctx.translate(16, cy);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText(lbl, 0, 0);
+    ctx.restore();
   });
 
   // ── Physics ───────────────────────────────────────────
@@ -840,10 +1173,10 @@ function refreshStrips(){
   setFlex('m-high', mH/mT*100);
 
   // threshold labels
-  document.getElementById('r-lo-v').textContent = rLo;
-  document.getElementById('r-hi-v').textContent = rHi;
-  document.getElementById('m-lo-v').textContent = mLo;
-  document.getElementById('m-hi-v').textContent = mHi;
+  document.getElementById('r-lo-v').textContent = rLo + 'd';
+  document.getElementById('r-hi-v').textContent = rHi + 'd';
+  document.getElementById('m-lo-v').textContent = '€' + mLo;
+  document.getElementById('m-hi-v').textContent = '€' + mHi;
   document.getElementById('leg-hot').textContent  = `≤${rLo}d HOT`;
   document.getElementById('leg-warm').textContent = `≤${rHi}d WARM`;
 }
@@ -899,18 +1232,26 @@ function renderDefs(){
   const cnt={}; Object.keys(SEGS).forEach(k=>cnt[k]=0);
   custs.forEach(c=>cnt[c.seg]++);
 
+  // Map rule values to pill classes
+  const pillClass = {
+    'HOT':'hot','WARM':'warm','COLD':'cold','≤7d':'new7',
+    'FREQUENT':'freq','INFREQ':'cold',
+    'HIGH':'high','MID/HIGH':'mid','MID/LOW':'mid','ANY':'any',
+  };
+
   document.getElementById('defs').innerHTML=Object.entries(SEGS).map(([k,sg])=>{
     const{R,F,M}=sg.rules;
-    return `<div class="dc" data-seg="${k}" style="border-top:2px solid ${sg.col}44">
+    const rp = (v)=>`<span class="rpill ${pillClass[v]||'any'}">${v}</span>`;
+    return `<div class="dc" data-seg="${k}">
       <div class="dc-head">
-        ${svgIcon(sg.shape,sg.col,9)}
-        <span class="dc-name" style="color:${sg.col}">${sg.label}</span>
-        <span class="dc-n" style="color:${sg.col}">${cnt[k]}</span>
+        ${svgIcon(sg.shape,'#1a1a18',9)}
+        <span class="dc-name">${sg.label}</span>
+        <span class="dc-n">${cnt[k]}</span>
       </div>
-      <div class="dc-pills">
-        <span class="xpill lbl">R</span>${pillEl(R,false)}
-        <span class="xpill lbl" style="margin-left:3px">F</span>${pillEl(F,F==='ANY')}
-        <span class="xpill lbl" style="margin-left:3px">M</span>${pillEl(M,M==='ANY')}
+      <div class="dc-rules">
+        <div class="dc-rule"><span class="dc-rule-key">R</span>${rp(R)}</div>
+        <div class="dc-rule"><span class="dc-rule-key">F</span>${rp(F)}</div>
+        <div class="dc-rule"><span class="dc-rule-key">M</span>${rp(M)}</div>
       </div>
       <div class="dc-desc">${sg.desc}</div>
     </div>`;
