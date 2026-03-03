@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>José Manuel Antolín - Madrid</title>
+    <title>José Manuel Antolín</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%233066ff'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=QPMH0CL7N2"></script>
-    <script src="/js/analytics.js"></script>
+    <script src="/js/analytics.js"></script>  
     
     <style>
 
-        
 /* Design Variables */
 :root {
     --bg-light: #ffffff;
@@ -146,14 +145,14 @@ section { margin-bottom:0; }
             max-width: 560px; margin-bottom: 36px;
         }
         .page-wrapper.dark-mode .hero-sub { color: var(--text-secondary-dark); }
-        .hero-cta {
+        .hero-cta-DISABLED {
             display: inline-flex; align-items: center; gap: 8px;
             font-size: 13px; font-weight: 500; color: var(--accent);
             text-decoration: none; border-bottom: 1px solid transparent;
             transition: border-color 0.15s; padding-bottom: 2px;
         }
-        .hero-cta:hover { border-bottom-color: var(--accent); text-decoration: none; color: var(--accent); }
-        .hero-cta::after { content: '→'; }
+        .hero-cta-DISABLED:hover { border-bottom-color: var(--accent); text-decoration: none; color: var(--accent); }
+        .hero-cta-DISABLED::after { content: '→'; }
 
         .section-label {
             font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
@@ -223,9 +222,122 @@ section { margin-bottom:0; }
         .stack-tags { display:flex; flex-wrap:wrap; gap:6px; }
         .stack-tag { font-size:11px; padding:3px 8px; border-radius:3px; background:var(--bg-secondary-light); color:var(--text-light); }
         .page-wrapper.dark-mode .stack-tag { background:var(--bg-dark); color:var(--text-dark); }
+
+        .hero-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background: #c8440a;
+            color: #fff;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.15s, transform 0.1s;
+            border: none;
+            cursor: pointer;
+        }
+        .hero-cta-btn:hover {
+            background: #a83608;
+            text-decoration: none;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .consulting-email-btn {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 20px;
+            background: #c8440a;
+            color: #fff;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .consulting-email-btn:hover {
+            background: #a83608;
+            text-decoration: none;
+            color: #fff;
+            transform: translateY(-1px);
+        }
         .header { margin-bottom: 0; }
         section { margin-bottom: 0; }
 
+
+        .hero-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background: #c8440a;
+            color: #fff !important;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border-radius: 8px;
+            text-decoration: none !important;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .hero-cta-btn:hover {
+            background: #a83608;
+            color: #fff !important;
+            text-decoration: none !important;
+            transform: translateY(-1px);
+        }
+        .consulting-email-btn {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 20px;
+            background: #c8440a;
+            color: #fff !important;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border-radius: 6px;
+            text-decoration: none !important;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .consulting-email-btn:hover {
+            background: #a83608;
+            color: #fff !important;
+            text-decoration: none !important;
+            transform: translateY(-1px);
+        }
+
+        .header-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px;
+            background: #3066ff;
+            color: #fff !important;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border-radius: 6px;
+            text-decoration: none !important;
+            transition: background 0.15s, transform 0.1s;
+            white-space: nowrap;
+        }
+        .header-cta-btn:hover {
+            background: #a83608;
+            color: #fff !important;
+            text-decoration: none !important;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -242,9 +354,7 @@ section { margin-bottom:0; }
                         <a href="#shelf">Shelf</a>
                     </nav>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
-                    <span class="theme-icon">☀</span>
-                </button>
+                <a href="mailto:jose@antolinjm.com?subject=Consulting%20enquiry&body=Hi%20Jos%C3%A9%2C%0A%0AI%27d%20like%20to%20discuss%20a%20potential%20project.%0A%0A" class="header-cta-btn">Get in touch</a>
             </header>
 
             <section class="hero fade-in">
@@ -366,7 +476,7 @@ section { margin-bottom:0; }
                     </div>
                     <div class="consulting-footer">
                         <div class="consulting-availability"><span class="avail-dot"></span>Available for new projects</div>
-                        <a href="mailto:jose@antolinjm.com" class="consulting-email">jose@antolinjm.com</a>
+                        <a href="mailto:jose@antolinjm.com?subject=Consulting%20enquiry&body=Hi%20Jos%C3%A9%2C%0A%0AI%27d%20like%20to%20discuss%20a%20potential%20project.%0A%0A" class="consulting-email-btn">Get in touch</a>
                     </div>
                 </div>
             </section>
@@ -440,7 +550,7 @@ section { margin-bottom:0; }
             <div>José Manuel Antolín · Madrid</div>
             <div class="social-links">
                 <a href="https://x.com/antolinjm" target="_blank">Twitter/X</a>
-                <a href="mailto:jose@antolinjm.com">jose@antolinjm.com</a>
+                <a href="/cdn-cgi/l/email-protection#12787d617752737c667d7e7b7c787f3c717d7f"><span class="__cf_email__" data-cfemail="a0cacfd3c5e0c1ced4cfccc9cecacd8ec3cfcd">[email&#160;protected]</span></a>
             </div>
         </footer>
 
@@ -454,7 +564,7 @@ section { margin-bottom:0; }
         </div>
     </div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const BADGE = Object.freeze({ TOP:'top', FAVORITE:'favorite', CORE:'core' });
 function book(title,author,year,{isbn=null,badge=null,review=''}={}) { return{title,author,year:String(year),isbn,badge,review}; }
 function movie(title,year,{badge=null,review=''}={}) { return{title,year:String(year),badge,review}; }
@@ -604,16 +714,4 @@ function toggleTheme(){
     const isDark=wrapper.classList.contains('dark-mode');
     const icon=document.querySelector('.theme-icon');
     if(isDark){wrapper.classList.remove('dark-mode');localStorage.setItem('theme','light');icon.textContent='☀';}
-    else{wrapper.classList.add('dark-mode');localStorage.setItem('theme','dark');icon.textContent='☽';}
-}
-(function loadTheme(){
-    const saved=localStorage.getItem('theme');
-    const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if(saved==='dark'||(saved===null&&prefersDark)){
-        document.getElementById('page-wrapper').classList.add('dark-mode');
-        document.querySelector('.theme-icon').textContent='☽';
-    }
-})();
-    </script>
-</body>
-</html>
+    else{wrapper.classList.add('dark-mode');localStorage.setItem('theme','dark'
