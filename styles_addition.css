@@ -1,0 +1,16 @@
+
+/* Available for consulting signal */
+.available-line {
+    opacity: 0.85;
+}
+
+.available-line a {
+    color: var(--accent);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.available-line a:hover {
+    border-bottom-color: var(--accent);
+    text-decoration: none;
+}
