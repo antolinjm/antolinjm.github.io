@@ -126,7 +126,7 @@ function populateEssays() {
     list.forEach(essay => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <a href="${escapeAttr(essay.url)}" target="_blank" rel="noopener">${escapeHtml(essay.title)}</a>
+            <a href="${escapeAttr(essay.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(essay.title)}</a>
             ${essay.badge ? `<span class="badge" style="margin-left:8px">${badgeIcon(essay.badge)}</span>` : ''}
             <div class="source">${escapeHtml(essay.source)}</div>
         `;
