@@ -6,7 +6,7 @@ Personal portfolio and interactive tools site for José Manuel Antolín — a BI
 
 ## Architecture
 
-- **Portfolio**: `index.html` + `styles.css` + `js/*.js` — editorial portfolio site using the Editorial design palette (see `design.md` section 11)
+- **Portfolio**: `index.html` + `styles.css` + `js/*.js` — editorial portfolio site using the Editorial design palette (see `DESIGN.md` section 11)
 - **Tools**: Self-contained single HTML files in `tools/` — each is a standalone interactive visualization
 
 ## Tools Philosophy
@@ -27,14 +27,14 @@ The `tools/` directory contains interactive analytical tools that showcase what 
 
 ### Shared Design Tokens
 
-The canonical design token system lives in **[design.md](design.md)** — including the Warm Beige default palette, Warm Dark variant (for canvas-heavy tools), Cool Neutral and Ink variants, and all typography, spacing, shadow, and border-radius specs. The non-negotiable implementation rules are in `design.md` section 9.
+The canonical design token system lives in **[DESIGN.md](DESIGN.md)** — including the Warm Beige default palette, Warm Dark variant (for canvas-heavy tools), Cool Neutral and Ink variants, and all typography, spacing, shadow, and border-radius specs. The non-negotiable implementation rules are in `DESIGN.md` section 9.
 
 Minimum token set for a new tool: `--bg`, `--surface`, `--card`, `--card-lift`, `--ink`, `--muted`, `--accent`, `--border`, `--border-deep`, `--dim`, `--branding`.
 
 Fonts by context:
 - **Main site** (`index.html`): `Space Grotesk` (headings), `Inter` (body), `IBM Plex Mono` (labels/eyebrows/nav). See `design.md` section 11.
 - **Tools**: `IBM Plex Mono` (headers, labels, data). Some tools add `Syne` 700/800 for hero numbers in canvas-heavy animated contexts. See `design.md` section 4.
-- **Infographics**: `IBM Plex Sans` (body, titles), `IBM Plex Mono` (data labels). See `design.md` section 4.
+
 
 ### Tool Title Convention
 
@@ -53,15 +53,6 @@ HTML `<title>`: `Tool Name — antolinjm`
 - Semantic HTML structure.
 - Responsive design (tools should degrade gracefully on mobile, but desktop is the primary target).
 - Keep files reasonably sized — don't over-abstract, but don't write 3000-line monsters either.
-
-## Content Skills
-
-Reusable prompt files for content creation, stored in `skills/`. Read the relevant file before executing the task.
-
-- **[skills/linkedin-post.md](skills/linkedin-post.md)** — Writing rules, voice, format, and variant logic for LinkedIn posts. Use when asked to write or draft a post.
-- **[skills/infographic.md](skills/infographic.md)** — Design system, archetypes, HTML template, and quality checklist for LinkedIn-ready infographics. Use when asked to create an infographic.
-
-Post ideas backlog: **[linkedin-post-ideas.md](linkedin-post-ideas.md)**
 
 ## Git & Deployment
 
