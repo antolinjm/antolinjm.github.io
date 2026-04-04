@@ -40,8 +40,8 @@ Use this for all new work unless there is a deliberate reason to use a variant (
 **Token drift resolution (for existing files):**
 - Canonical text token: `--ink` (not `--text`)
 - Canonical muted: `#6b6b65` (RFM/Process Flow tools use `#888880` locally — acceptable when needed for contrast on canvas, but new files default to `#6b6b65`)
-- Canonical card: `#eceae4` (not `#e8e7e2`)
-- Canonical border: `#d4d2cb` (not `#d0cfc8`)
+- Canonical card: #eceae4 (not #e8e7e2)
+- Canonical border: #d4d2cb` (not #d0cfc8)
 
 ---
 
@@ -286,7 +286,7 @@ These are consistent across all palette variants. They do not change when the ba
 --cool:     #0891b2;    /* timing / duration / latency */
 ```
 
-**Note on `--bad` and `--accent`:** they share the value `#c8440a` intentionally. In a single view, distinguish by context — `--accent` for positive emphasis (the featured element), `--bad` for negative state in a status indicator. They can coexist in the same tool.
+**Note on `--bad` and `--accent`:** they share the value #c8440a` intentionally. In a single view, distinguish by context — `--accent` for positive emphasis (the featured element), `--bad` for negative state in a status indicator. They can coexist in the same tool.
 
 ---
 
@@ -296,11 +296,11 @@ These are consistent across all palette variants. They do not change when the ba
 
 1. **No CSS variables inside `#canvas`** in infographic files. `html2canvas` cannot resolve `var(--x)`. All colors inside the canvas must be hardcoded hex.
 
-2. **Accent `#c8440a` on exactly one element per composition.** Best candidates: the key stat/number, the champion card title, one word in the display title. Acceptable: a thin horizontal rule. Never: multiple cards, large background fills, decorative borders.
+2. **Accent #c8440a on exactly one element per composition.** Best candidates: the key stat/number, the champion card title, one word in the display title. Acceptable: a thin horizontal rule. Never: multiple cards, large background fills, decorative borders.
 
 3. **No hard borders as section or card separators.** Use tonal layering: `--bg` → `--surface` → `--card` → `--card-lift`. The ghost accent border (via `box-shadow`) is acceptable on a single featured card. `border: 1px solid` is acceptable only on interactive input elements (form fields, range sliders) where visual affordance requires it.
 
-4. **Semantic colors** (`--good`, `--warn`, `--bad`, `--hot`, etc.) may appear on multiple elements. Rule 2 applies only to `#c8440a` as an emphasis signal, not as a status indicator.
+4. **Semantic colors** (`--good`, `--warn`, `--bad`, `--hot`, etc.) may appear on multiple elements. Rule 2 applies only to #c8440a as an emphasis signal, not as a status indicator.
 
 ### Typography
 
@@ -346,7 +346,7 @@ These are consistent across all palette variants. They do not change when the ba
 
 ### Main site (`index.html` / `styles.css`)
 
-The main site uses the **Editorial** palette (section 11). It has its own typography (Space Grotesk + Inter + IBM Plex Mono) and color system (blue accent `#3066ff`) distinct from both the tool palette (Warm Beige, section 2) and infographic palette. See section 11 for full specs.
+The main site uses the **Editorial** palette (section 11). It has its own typography (Space Grotesk + Inter + IBM Plex Mono) and color system (blue accent #3066ff) distinct from both the tool palette (Warm Beige, section 2) and infographic palette. See section 11 for full specs.
 
 ---
 
@@ -445,4 +445,4 @@ Solid background fallback for browsers without `backdrop-filter` support: `backg
 
 ### Status indicator
 
-The green "available" dot uses `#16a34a` with a CSS pulse animation (`@keyframes`). This is an interactive site element, not infographic content — animations are acceptable here.
+The green "available" dot uses #16a34a with a CSS pulse animation (`@keyframes`). This is an interactive site element, not infographic content — animations are acceptable here.
