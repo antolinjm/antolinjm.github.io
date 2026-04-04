@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Process Flow Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:      #f5f4f0;
+  --surface: #eeede8;
+  --card:    #e8e7e2;
+  --border:  #d0cfc8;
+  --border2: #c0bfb8;
+  --text:    #1a1a18;
+  --muted:   #888880;
+  --dim:     #d8d7d0;
+
+  --cool:    #0891b2;
+  --warm:    #d97706;
+  --hot:     #dc2626;
+  --green:   #16a34a;
+
+  --font:      'IBM Plex Mono', 'Courier New', monospace;
+  --font-head: var(--font);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* ── APP GRID ─────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-rows: 34px 56px 1fr 210px;
+  grid-template-columns: 1fr 290px;
+  grid-template-areas:
+    "nav   nav"
+    "ttl   ttl"
+    "viz   side"
+    "gantt side";
+  height: 100vh;
+  min-height: 480px;
+}
+
+/* ── NAV ──────────────────────────────────────────── */
+nav {
+  grid-area: nav;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.4rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.nav-back {
+  font-family: var(--font);
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.nav-back:hover { color: var(--text); }
+.nav-crumb {
+  font-family: var(--font);
+  font-size: 0.82rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+/* ── TITLE ────────────────────────────────────────── */
+.page-title {
+  grid-area: ttl;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1.4rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.page-title h1 {
+  font-family: var(--font);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.page-title .sub {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+  letter-spacing: 0.01em;
+}
+
+/* ── VIZ (canvas) ─────────────────────────────────── */
+.viz {
+  grid-area: viz;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+#cv { display: block; width: 100%; height: 100%; }
+
+/* ── GANTT STRIP ──────────────────────────────────── */
+.gantt {
+  grid-area: gantt;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+.gantt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.25rem;
+}
+.gantt-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.gantt-info { font-size: 0.76rem; color: var(--muted); }
+.gantt-chart { position: relative; min-width: 420px; }
+
+.gr { display: flex; height: 26px; }
+.gl {
+  width: 90px; flex-shrink: 0; display: flex; align-items: center;
+  font-size: 0.72rem; color: var(--muted); padding-right: 0.25rem;
+  overflow: hidden; white-space: nowrap;
+}
+.gl.bn { color: var(--hot); font-weight: 600; }
+.gt { flex: 1; position: relative; border-left: 1px solid var(--border); }
+.gb {
+  position: absolute; top: 2px; bottom: 2px; border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.64rem; font-weight: 600; border: 1px solid;
+  transition: all 0.2s; overflow: hidden;
+}
+.gsep { height: 1px; background: var(--dim); margin-left: 90px; }
+.gax { display: flex; padding-top: 0.1rem; }
+.gax-sp { width: 90px; flex-shrink: 0; }
+.gax-t { flex: 1; position: relative; height: 14px; border-left: 1px solid var(--border); }
+.gtick {
+  position: absolute; bottom: 0; font-size: 0.64rem; color: var(--muted);
+  transform: translateX(-50%); white-space: nowrap;
+}
+.gtick-0 { transform: none; }
+.ggrid { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--dim); pointer-events: none; }
+.gann { position: absolute; top: 0; left: 90px; right: 0; pointer-events: none; }
+.gann-line { position: absolute; top: 0; border-left: 1.5px dashed; }
+.gann-tag {
+  position: absolute; font-size: 0.64rem; white-space: nowrap;
+  padding: 0.06rem 0.2rem; border-radius: 2px; font-weight: 500;
+}
+
+/* ── SIDEBAR ──────────────────────────────────────── */
+.side {
+  grid-area: side;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--dim) transparent;
+}
+
+.ss { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); }
+
+.st {
+  font-size: 0.76rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem;
+}
+
+/* step input groups */
+.sgroup { margin-bottom: 0.4rem; }
+.sgroup:last-child { margin-bottom: 0; }
+.sg-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.15rem;
+}
+.sg-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.sg-eff { font-size: 0.78rem; color: var(--muted); }
+.sg-eff.bn { color: var(--hot); font-weight: 600; }
+
+.sg-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.08rem; }
+.sg-lbl {
+  font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.06em; width: 2.8rem; flex-shrink: 0;
+}
+.sg-val { font-size: 0.82rem; font-weight: 500; width: 2.4rem; text-align: right; flex-shrink: 0; color: var(--text); }
+
+input[type=range] {
+  -webkit-appearance: none; appearance: none; flex: 1;
+  height: 3px; background: var(--border2); border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px #0002; cursor: pointer; transition: transform 0.1s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px #0002; cursor: pointer;
+}
+
+.wk-btns { display: flex; gap: 2px; }
+.wk-btns button {
+  width: 32px; height: 26px; border: 1px solid var(--border2); background: transparent;
+  color: var(--muted); font-family: var(--font); font-size: 0.74rem;
+  cursor: pointer; border-radius: 2px; transition: all 0.15s;
+}
+.wk-btns button.active {
+  background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600;
+}
+.wk-btns button:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+/* stats grid in sidebar */
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; }
+.sbox { background: var(--dim); border-radius: 2px; padding: 0.4rem 0.5rem; }
+.slb { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.svl { font-family: var(--font); font-size: 1.1rem; font-weight: 600; color: var(--text); margin-top: 0.02rem; }
+.svl.hot { color: var(--hot); }
+
+/* utilization bars in sidebar */
+.util-row {
+  display: flex; align-items: center; gap: 0.3rem;
+  margin-bottom: 0.25rem; font-size: 0.76rem;
+}
+.util-row:last-child { margin-bottom: 0; }
+.util-name { width: 5.5rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.util-bar { flex: 1; height: 7px; background: var(--dim); border-radius: 2px; overflow: hidden; }
+.util-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.util-pct { width: 2rem; text-align: right; font-weight: 500; }
+
+/* ── EXPLAINER ────────────────────────────────────── */
+.explainer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 3rem 2rem 4rem;
+}
+.ex-inner { max-width: 860px; margin: 0 auto; }
+
+.ex-label {
+  font-size: 0.74rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem;
+}
+.ex-title {
+  font-family: var(--font-head); font-size: 1.5rem; font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em; margin-bottom: 1.2rem; line-height: 1.2;
+}
+.ex-lead {
+  font-size: 0.9rem; line-height: 1.75; color: var(--text);
+  margin-bottom: 2rem; max-width: 640px;
+}
+
+.ex-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 3px; overflow: hidden; margin-bottom: 2rem;
+}
+.ex-card { background: var(--bg); padding: 1.2rem 1.3rem; }
+.ex-card-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem;
+}
+.ex-card-letter {
+  font-family: var(--font-head); font-size: 1.6rem; font-weight: 800;
+  color: var(--text); line-height: 1; margin-bottom: 0.4rem;
+}
+.ex-card-title {
+  font-size: 0.75rem; font-weight: 600; color: var(--text);
+  margin-bottom: 0.4rem; letter-spacing: 0.02em;
+}
+.ex-card-body { font-size: 0.74rem; color: var(--muted); line-height: 1.6; }
+.ex-card-example {
+  margin-top: 0.6rem; font-size: 0.68rem; color: var(--muted);
+  border-left: 2px solid var(--border2); padding-left: 0.6rem; line-height: 1.5;
+}
+
+.ex-divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.ex-h2 {
+  font-family: var(--font-head); font-size: 0.95rem; font-weight: 700;
+  color: var(--text); letter-spacing: -0.01em; margin-bottom: 0.7rem;
+}
+.ex-p {
+  font-size: 0.78rem; line-height: 1.75; color: var(--muted);
+  margin-bottom: 1rem; max-width: 680px;
+}
+
+.ex-formula {
+  background: var(--card); border: 1px solid var(--border); border-radius: 3px;
+  padding: 1rem 1.2rem; margin-top: 1rem; font-size: 0.68rem;
+  line-height: 1.8; color: var(--muted);
+}
+.ex-formula strong { color: var(--text); font-weight: 600; }
+
+.ex-table {
+  width: 100%; border-collapse: collapse; font-size: 0.74rem; margin-top: 1rem;
+}
+.ex-table th {
+  text-align: left; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+.ex-table td {
+  padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--border);
+  vertical-align: top; color: var(--muted); line-height: 1.5;
+}
+.ex-table td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+.ex-table tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- APP GRID                                           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="app">
+
+  <nav>
+    <a class="nav-back" href="/">← antolinjm</a>
+    <span class="nav-crumb">tools / process-flow</span>
+  </nav>
+
+  <div class="page-title">
+    <h1>Process Flow Analyzer</h1>
+    <span class="sub">Bottleneck identification, capacity analysis, and pipeline scheduling for a linear production process.</span>
+  </div>
+
+  <div class="viz"><canvas id="cv"></canvas></div>
+
+  <div class="gantt">
+    <div class="gantt-head">
+      <span class="gantt-title">Pipeline Gantt</span>
+      <span class="gantt-info" id="gantt-info"></span>
+    </div>
+    <div class="gantt-chart" id="gantt"></div>
+  </div>
+
+  <div class="side">
+    <div class="ss">
+      <div class="st">Process Steps</div>
+      <div id="inputs"></div>
+    </div>
+    <div class="ss">
+      <div class="st">Order Arrival</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">
+        <span style="font-size:0.82rem;color:var(--muted)">New order every</span>
+        <span style="font-size:0.88rem;font-weight:600" id="ar-val">10m</span>
+      </div>
+      <input type="range" id="ar-slider" min="1" max="30" value="10" step="1">
+      <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-top:0.15rem"><span>1m</span><span>30m</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem;line-height:1.45" id="ar-note"></div>
+    </div>
+    <div class="ss">
+      <div class="st">Key Metrics</div>
+      <div class="sgrid" id="stats"></div>
+    </div>
+    <div class="ss">
+      <div class="st">Utilization per cycle</div>
+      <div id="util"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- EXPLAINER (below viewport, scrollable)             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="explainer">
+  <div class="ex-inner">
+
+    <div class="ex-label">Methodology</div>
+    <h2 class="ex-title">What is Bottleneck Analysis?</h2>
+    <p class="ex-lead">Every linear production process has a bottleneck — the single step with the longest effective cycle time. This step limits the entire line's throughput, regardless of how fast the other steps are. Identifying and improving the bottleneck is the highest-leverage move in operations management.</p>
+
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ex-card-label">Concept 1</div>
+        <div class="ex-card-letter">CT</div>
+        <div class="ex-card-title">Effective Cycle Time</div>
+        <div class="ex-card-body">The time it takes one step to process one unit, adjusted for the number of workers. More workers at a station reduce the effective time proportionally.</div>
+        <div class="ex-card-example">If a step takes 10 min with 1 worker, adding a 2nd worker reduces effective time to 5 min. Workers = 0 means a passive step (machine/cooling) — time is fixed.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-card-label">Concept 2</div>
+        <div class="ex-card-letter">BN</div>
+        <div class="ex-card-title">The Bottleneck</div>
+        <div class="ex-card-body">The step with the longest effective cycle time. It determines the system's pace — you can only produce one unit per bottleneck cycle, no matter what. All other steps sit idle waiting.</div>
+        <div class="ex-card-example">With steps at 8m, 10m, 5m, 2m, 1m — the 10m step is the bottleneck. Maximum capacity = 60 ÷ 10 = 6 units/hour.</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-card-label">Concept 3</div>
+        <div class="ex-card-letter">PP</div>
+        <div class="ex-card-title">Pipeline Scheduling</div>
+        <div class="ex-card-body">Orders overlap in a pipeline: while order #2 is at step 1, order #1 is already at step 2. The Gantt chart shows this overlap. After the first delivery, new units come out at the bottleneck's pace.</div>
+        <div class="ex-card-example">First delivery = sum of all step times (throughput time). After that, one every cycle time. The pipeline is the reason factories are far faster than single-unit processing.</div>
+      </div>
+    </div>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Why it matters</h3>
+    <p class="ex-p">In a real factory, restaurant, or service line, identifying the bottleneck tells you exactly where to invest — adding workers, buying a second machine, or redesigning the step. Spending effort anywhere else has zero impact on throughput until the bottleneck is fixed. This is the core insight of the Theory of Constraints.</p>
+    <p class="ex-p">The pipeline visualization above shows orders flowing through the process. Notice how tokens queue before the bottleneck — this is what happens in practice: inventory builds up in front of the slowest step, while downstream steps wait idle.</p>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Key formulas</h3>
+    <table class="ex-table">
+      <thead>
+        <tr><th>Metric</th><th>Formula</th><th>What it means</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Effective time</td><td>base_time ÷ max(workers, 1)</td><td>How long one step actually takes per unit, adjusted for parallel workers</td></tr>
+        <tr><td>Bottleneck</td><td>max(effective times)</td><td>The step with the longest effective time — it limits everything</td></tr>
+        <tr><td>Throughput time</td><td>Σ all effective times</td><td>Time for one unit to go from start to finish, end-to-end, no queue</td></tr>
+        <tr><td>Cycle time</td><td>= bottleneck time</td><td>Time between consecutive completed units at steady state</td></tr>
+        <tr><td>Capacity / hour</td><td>60 ÷ cycle time</td><td>Maximum units per hour at steady state</td></tr>
+        <tr><td>Utilization</td><td>step_time ÷ cycle_time × 100%</td><td>How busy each step is relative to the bottleneck pace</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Pipeline scheduling rule</h3>
+    <p class="ex-p">For any order <em>i</em> at step <em>j</em>, the start time follows a simple rule: it must wait for both the previous step of the same order, and the same step of the previous order. This creates the cascading Gantt pattern above.</p>
+    <div class="ex-formula">
+      <strong>start[i][j] = max( end[i][j-1], end[i-1][j] )</strong><br>
+      where end[i][j] = start[i][j] + effective_time[j]<br><br>
+      <strong>Throughput time</strong> = end[0][last_step] — first unit, no pipeline benefit<br>
+      <strong>Steady-state gap</strong> = bottleneck cycle time — after pipeline fills, one unit exits every CT minutes
+    </div>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">How to use this tool</h3>
+    <p class="ex-p">Adjust the time and crew sliders on the right to model your process. The animated pipeline shows orders flowing through your line in real time — watch how they queue before the bottleneck. The Gantt chart below shows the exact schedule for enough orders to fill a 60-minute window.</p>
+    <p class="ex-p">Try adding a second worker to the bottleneck step — you'll see the bottleneck shift to a different step, utilization patterns change, and capacity increase. This is the core exercise in process improvement: find the constraint, ease it, find the new constraint, repeat.</p>
+
+  </div>
+</section>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════ */
+const DEFAULTS = [
+  { name: 'Prepare & Mix',    base: 8,  crew: 1 },
+  { name: 'Load & Process',   base: 10, crew: 1 },
+  { name: 'Rest & Cool',      base: 5,  crew: 0 },
+  { name: 'Inspect & Pack',   base: 2,  crew: 1 },
+  { name: 'Dispatch & Close', base: 1,  crew: 1 },
+];
+const N = DEFAULTS.length;
+const SIM_SPEED = 3.5;
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+let state = { steps:[], effs:[], bnIdx:0, tp:0, ct:0, cph:0, nOrders:4, sched:null };
+let tokens = [], simTime = 0, spawnTimer = 0, tokenId = 0;
+
+/* ═══════════════════════════════════════════════════════
+   UTILS
+   ═══════════════════════════════════════════════════════ */
+const fmt = (n, d=0) => n.toLocaleString('en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+function thermalColor(ratio) {
+  // ratio = eff / arrivalRate: >1 means blocker (creates queues)
+  if (ratio > 1.1)   return '#dc2626';  // red — blocker, queue grows
+  if (ratio > 0.95)  return '#ea580c';  // orange — at capacity
+  if (ratio > 0.7)   return '#d97706';  // amber — nearing capacity
+  if (ratio > 0.4)   return '#ca8a04';  // yellow-green — comfortable
+  return '#0891b2';                      // teal — fast, no issue
+}
+
+function hexRgb(hex) {
+  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+}
+
+function roundRect(cx, x, y, w, h, r) {
+  cx.beginPath();
+  cx.moveTo(x+r,y); cx.lineTo(x+w-r,y);
+  cx.quadraticCurveTo(x+w,y,x+w,y+r); cx.lineTo(x+w,y+h-r);
+  cx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); cx.lineTo(x+r,y+h);
+  cx.quadraticCurveTo(x,y+h,x,y+h-r); cx.lineTo(x,y+r);
+  cx.quadraticCurveTo(x,y,x+r,y);
+  cx.closePath();
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPUTATION
+   ═══════════════════════════════════════════════════════ */
+function readInputs() {
+  const steps = [];
+  for (let i = 0; i < N; i++) {
+    const base = Math.max(1, +document.getElementById(`base${i}`).value || 1);
+    const crew = +(document.querySelector(`#wk${i} button.active`)?.dataset.crew ?? DEFAULTS[i].crew);
+    const eff = crew > 1 ? base / crew : base;
+    steps.push({ name: DEFAULTS[i].name, base, crew, eff });
+  }
+  return steps;
+}
+
+function schedule(effs, n, arrivalRate) {
+  const M = effs.length;
+  const S = Array.from({length:n}, () => new Array(M).fill(0));
+  const E = Array.from({length:n}, () => new Array(M).fill(0));
+  for (let i = 0; i < n; i++) for (let j = 0; j < M; j++) {
+    let t = 0;
+    if (j === 0) t = Math.max(t, i * arrivalRate); // order i arrives at this time
+    if (j > 0) t = Math.max(t, E[i][j-1]);
+    if (i > 0) t = Math.max(t, E[i-1][j]);
+    S[i][j] = t; E[i][j] = t + effs[j];
+  }
+  return { S, E };
+}
+
+function compute() {
+  const steps = readInputs();
+  const effs = steps.map(s => s.eff);
+  const maxE = Math.max(...effs);
+  const bnIdx = effs.indexOf(maxE);
+  const tp = effs.reduce((a,b) => a+b, 0);
+  const ct = maxE;
+  const cph = ct > 0 ? 60/ct : 0;
+  const ar = Math.max(1, +document.getElementById('ar-slider').value || ct);
+  const nOrders = ar <= 0 ? 4 : Math.max(3, Math.min(14, Math.floor(60/ar)+1));
+  const sc = schedule(effs, nOrders, ar);
+  state = { steps, effs, bnIdx, tp, ct, cph, nOrders, sched: sc, ar };
+}
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════ */
+function buildSidebar() {
+  document.getElementById('inputs').innerHTML = DEFAULTS.map((d,i) => `
+    <div class="sgroup">
+      <div class="sg-head">
+        <span class="sg-name">${d.name}</span>
+        <span class="sg-eff" id="seff${i}">—</span>
+      </div>
+      <div class="sg-row">
+        <span class="sg-lbl">Time</span>
+        <input type="range" id="base${i}" min="1" max="30" value="${d.base}" step="1"/>
+        <span class="sg-val" id="bval${i}">${d.base}m</span>
+      </div>
+      <div class="sg-row">
+        <span class="sg-lbl">Crew</span>
+        <div class="wk-btns" id="wk${i}">
+          ${[0,1,2,3].map(c => `<button data-crew="${c}" class="${c===d.crew?'active':''}">${c===0?'⊘':c}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  for (let i = 0; i < N; i++) {
+    document.getElementById(`base${i}`).addEventListener('input', function() {
+      document.getElementById(`bval${i}`).textContent = this.value + 'm';
+      onUpdate();
+    });
+    document.querySelectorAll(`#wk${i} button`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll(`#wk${i} button`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        onUpdate();
+      });
+    });
+  }
+
+  // Arrival rate slider
+  document.getElementById('ar-slider').addEventListener('input', function() {
+    document.getElementById('ar-val').textContent = this.value + 'm';
+    onUpdate();
+  });
+}
+
+function updateSidebar() {
+  const { steps, effs, bnIdx, tp, ct, cph, ar } = state;
+  const maxE = Math.max(...effs);
+
+  // Arrival rate note
+  const arNote = document.getElementById('ar-note');
+  if (ar < ct) {
+    arNote.textContent = `⚠ Orders arrive faster than the bottleneck (${fmt(ct,1)}m). Queue will grow indefinitely.`;
+    arNote.style.color = 'var(--hot)';
+  } else if (ar > ct * 1.5) {
+    arNote.textContent = `Orders arrive slower than the line can handle. Idle time between orders.`;
+    arNote.style.color = 'var(--muted)';
+  } else {
+    arNote.textContent = `Arrival matches bottleneck pace. Steady-state flow.`;
+    arNote.style.color = 'var(--cool)';
+  }
+
+  // Effective time labels
+  steps.forEach((s, i) => {
+    const isBn = i === bnIdx && s.eff > 0;
+    const el = document.getElementById(`seff${i}`);
+    if (s.crew === 0) el.textContent = `${fmt(s.eff)}m passive`;
+    else if (s.crew > 1) el.textContent = `${s.base}÷${s.crew} = ${fmt(s.eff,1)}m`;
+    else el.textContent = `${fmt(s.eff)}m`;
+    el.className = 'sg-eff' + (isBn ? ' bn' : '');
+  });
+
+  // Stats grid
+  document.getElementById('stats').innerHTML = `
+    <div class="sbox"><div class="slb">Throughput</div><div class="svl">${fmt(tp,1)}m</div></div>
+    <div class="sbox"><div class="slb">Cycle time</div><div class="svl hot">${fmt(ct,1)}m</div></div>
+    <div class="sbox"><div class="slb">Cap / hour</div><div class="svl">${fmt(cph,1)}</div></div>
+    <div class="sbox"><div class="slb">Bottleneck</div><div class="svl hot" style="font-size:.88rem">${steps[bnIdx].name.split('&')[0].trim()}</div></div>
+  `;
+
+  // Utilization bars
+  let html = '';
+  steps.forEach((s, i) => {
+    if (!s.eff) return;
+    const util = ct > 0 ? (s.eff/ct)*100 : 0;
+    const color = stations[i]?.color || '#0891b2';
+    html += `<div class="util-row">
+      <span class="util-name">${s.name.split('&')[0].trim()}</span>
+      <div class="util-bar"><div class="util-fill" style="width:${util}%;background:${color}"></div></div>
+      <span class="util-pct" style="color:${color}">${fmt(util,0)}%</span>
+    </div>`;
+  });
+  document.getElementById('util').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CANVAS — PIPELINE VISUALIZATION
+   ═══════════════════════════════════════════════════════ */
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
+let W = 800, H = 300;
+let stations = [];
+
+function resizeCanvas() {
+  const el = document.querySelector('.viz');
+  const rect = el.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  W = rect.width; H = rect.height;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  layoutStations();
+}
+
+function layoutStations() {
+  const mx = 160, cy = H * 0.44;
+  const spacing = N > 1 ? (W - mx*2) / (N-1) : 0;
+  const ar = state.ar || state.ct || 1;
+  stations = state.steps.map((s, i) => {
+    const ratio = s.eff / ar;  // color relative to arrival rate
+    const w = 100 + Math.min(ratio, 1) * 20;
+    return { x: mx + i*spacing, y: cy, w, h: 64, ratio: Math.min(ratio, 1.5), color: thermalColor(Math.min(ratio, 1.5)) };
+  });
+}
+
+function drawCanvas(ts) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Light background
+  ctx.fillStyle = '#f5f4f0';
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle dot grid
+  ctx.fillStyle = 'rgba(0,0,0,0.025)';
+  for (let x = 0; x < W; x += 22) for (let y = 0; y < H; y += 22) {
+    ctx.beginPath(); ctx.arc(x, y, 0.6, 0, Math.PI*2); ctx.fill();
+  }
+
+  if (!stations.length) return;
+  const cy = stations[0].y;
+  const { bnIdx } = state;
+  const pulse = Math.sin((ts||0) * 0.004) * 0.5 + 0.5;
+
+  // Conveyor belt (animated dashes)
+  const x0 = stations[0].x - 35, x1 = stations[N-1].x + 35;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([10, 8]);
+  ctx.lineDashOffset = -(ts||0) * 0.015;
+  ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // Connection arrows
+  for (let i = 0; i < N-1; i++) {
+    const a = stations[i], b = stations[i+1];
+    const ax = a.x + a.w/2 + 5, bx = b.x - b.w/2 - 5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(ax, cy); ctx.lineTo(bx, cy); ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,0.07)';
+    ctx.beginPath();
+    ctx.moveTo(bx, cy); ctx.lineTo(bx-5, cy-3); ctx.lineTo(bx-5, cy+3);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Draw tokens (behind stations)
+  drawTokens();
+
+  // Draw stations
+  stations.forEach((st, i) => {
+    const isBn = i === bnIdx && state.steps[i].eff > 0;
+    const sx = st.x - st.w/2, sy = st.y - st.h/2;
+    const [r,g,b] = hexRgb(st.color);
+
+    // Bottleneck glow
+    if (isBn) {
+      ctx.save();
+      ctx.shadowColor = st.color;
+      ctx.shadowBlur = 10 + pulse * 12;
+      ctx.fillStyle = `rgba(${r},${g},${b},0.08)`;
+      roundRect(ctx, sx-3, sy-3, st.w+6, st.h+6, 10);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Station body
+    ctx.save();
+    const alpha = 0.08 + st.ratio * 0.14;
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+    ctx.strokeStyle = st.color;
+    ctx.lineWidth = isBn ? 2 : 1;
+    if (isBn) { ctx.shadowColor = st.color; ctx.shadowBlur = 4 + pulse * 6; }
+    roundRect(ctx, sx, sy, st.w, st.h, 7);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    // Step name
+    ctx.fillStyle = '#1a1a18cc';
+    ctx.font = '500 14px "IBM Plex Mono"';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(state.steps[i].name.split('&')[0].trim(), st.x, st.y - 13);
+
+    // Effective time
+    ctx.fillStyle = st.color;
+    ctx.font = '600 19px "IBM Plex Mono"';
+    ctx.fillText(fmt(state.steps[i].eff, 1) + 'm', st.x, st.y + 12);
+
+    // Worker indicators
+    const crew = state.steps[i].crew;
+    const wy = st.y + st.h/2 + 16;
+    if (crew > 0) {
+      for (let w = 0; w < crew; w++) {
+        const wx = st.x - (crew-1)*5.5 + w*11;
+        ctx.fillStyle = st.color + '55';
+        ctx.beginPath(); ctx.arc(wx, wy, 3, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = st.color + '88';
+        ctx.beginPath(); ctx.arc(wx, wy-5.5, 1.8, 0, Math.PI*2); ctx.fill();
+      }
+    } else {
+      ctx.fillStyle = '#1a1a1833';
+      ctx.font = '11px "IBM Plex Mono"';
+      ctx.fillText('passive', st.x, wy);
+    }
+
+    // Bottleneck badge (below station + workers)
+    if (isBn) {
+      ctx.save();
+      const bx = st.x, by = st.y + st.h/2 + 32;
+      ctx.font = '600 12px "IBM Plex Mono"';
+      ctx.textAlign = 'center';
+      const label = '\u25B2 BOTTLENECK';
+      const tw = ctx.measureText(label).width + 10;
+      ctx.fillStyle = `rgba(${r},${g},${b},0.12)`;
+      roundRect(ctx, bx-tw/2, by-8, tw, 16, 3);
+      ctx.fill();
+      ctx.fillStyle = st.color;
+      ctx.fillText(label, bx, by + 1);
+      ctx.restore();
+    }
+  });
+
+  // Entry/exit labels
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.font = '500 13px "IBM Plex Mono"';
+  ctx.textAlign = 'center';
+  ctx.fillText('IN \u25B6', stations[0].x - stations[0].w/2 - 28, cy);
+  ctx.fillText('\u25B6 OUT', stations[N-1].x + stations[N-1].w/2 + 30, cy);
+
+  // Spawn rate indicator
+  if (state.ar > 0) {
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
+    ctx.font = '400 11px "IBM Plex Mono"';
+    ctx.textAlign = 'center';
+    ctx.fillText('1 every ' + fmt(state.ar, 0) + 'm', stations[0].x - stations[0].w/2 - 28, cy + 18);
+  }
+
+  // Token counter (top-right)
+  ctx.save();
+  ctx.font = '500 13px "IBM Plex Mono"';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = tokens.length >= 80 ? '#dc2626' : tokens.length >= 50 ? '#d97706' : '#1a1a1888';
+  ctx.fillText('Orders in system: ' + tokens.length + (tokens.length >= 100 ? ' (MAX)' : ''), W - 16, 22);
+  ctx.restore();
+
+  // Capacity-reached warning
+  if (tokens.length >= 100) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(220,38,38,0.08)';
+    roundRect(ctx, W/2 - 155, H - 30, 310, 24, 4);
+    ctx.fill();
+    ctx.fillStyle = '#dc2626';
+    ctx.font = '500 12px "IBM Plex Mono"';
+    ctx.textAlign = 'center';
+    ctx.fillText('\u26A0 Max 100 orders in system \u2014 line cannot absorb this demand', W/2, H - 15);
+    ctx.restore();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOKEN ANIMATION
+   ═══════════════════════════════════════════════════════ */
+const T_COLORS = ['#6366f1','#8b5cf6','#a855f7','#ec4899','#f97316','#10b981','#0ea5e9','#eab308'];
+
+function spawnToken() {
+  if (!stations.length) return;
+  tokens.push({
+    id: tokenId++,
+    x: stations[0].x - stations[0].w/2 - 50,
+    y: stations[0].y,
+    targetX: stations[0].x,
+    targetY: stations[0].y,
+    vx: 0, vy: 0,
+    stIdx: 0,
+    state: 'waiting',
+    timer: 0,
+    color: T_COLORS[tokenId % T_COLORS.length],
+    alpha: 1,
+  });
+}
+
+// Arrange queued tokens in a compact grid above the station
+function queueLayout(waiters, startIdx, st) {
+  const count = waiters.length - startIdx;
+  if (count <= 0) return;
+  const cols = Math.max(3, Math.min(6, Math.ceil(Math.sqrt(count))));
+  const gap = 10;
+  for (let i = startIdx; i < waiters.length; i++) {
+    const qi = i - startIdx;
+    const row = Math.floor(qi / cols);
+    const col = qi % cols;
+    const gridW = Math.min(count, cols) * gap;
+    waiters[i].targetX = st.x - gridW/2 + col * gap + gap/2;
+    waiters[i].targetY = st.y - st.h/2 - 14 - row * gap;
+  }
+}
+
+function simStep(dt) {
+  if (!state.effs.length || state.ct <= 0) return;
+  const simDt = dt * SIM_SPEED / 1000;
+  simTime += simDt;
+
+  spawnTimer += simDt;
+  const spawnInterval = Math.max(state.ar || state.ct, 0.5);
+  if (spawnTimer >= spawnInterval && tokens.length < 100) {
+    spawnToken();
+    spawnTimer = 0;
+  }
+
+  // Decrease processing timers
+  tokens.forEach(t => {
+    if (t.state === 'processing') {
+      t.timer -= simDt;
+      if (t.timer <= 0) {
+        t.stIdx++;
+        if (t.stIdx >= N) {
+          t.state = 'exiting';
+          t.targetX = stations[N-1].x + stations[N-1].w/2 + 70;
+          t.targetY = stations[N-1].y;
+        } else {
+          t.state = 'waiting';
+          t.targetX = stations[t.stIdx].x;
+          t.targetY = stations[t.stIdx].y;
+        }
+      }
+    }
+  });
+
+  // Assign waiting tokens to free stations & position queues
+  for (let j = 0; j < N; j++) {
+    const hasProc = tokens.some(t => t.state === 'processing' && t.stIdx === j);
+    const waiters = tokens.filter(t => t.state === 'waiting' && t.stIdx === j).sort((a,b) => a.id - b.id);
+    const st = stations[j];
+
+    if (!hasProc && waiters.length > 0) {
+      // First waiter enters the station
+      waiters[0].targetX = st.x;
+      waiters[0].targetY = st.y;
+      if (Math.abs(waiters[0].x - st.x) < 18) {
+        waiters[0].state = 'processing';
+        waiters[0].timer = state.effs[j];
+      }
+      // Remaining waiters queue in a grid above the station
+      queueLayout(waiters, 1, st);
+    } else {
+      // Station occupied — all waiters queue above
+      queueLayout(waiters, 0, st);
+    }
+  }
+
+  // Smooth movement (no overshoot)
+  const LERP = 0.14;
+  tokens.forEach(t => {
+    t.x += (t.targetX - t.x) * LERP;
+    t.y += (t.targetY - t.y) * LERP;
+    if (t.state === 'exiting') {
+      t.alpha = Math.max(0, t.alpha - 0.015);
+      if (t.alpha <= 0) t.state = 'done';
+    }
+  });
+
+  tokens = tokens.filter(t => t.state !== 'done');
+}
+
+function drawTokens() {
+  tokens.forEach(t => {
+    if (t.alpha <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = t.alpha * 0.85;
+    ctx.shadowColor = t.color;
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = t.color;
+    ctx.beginPath(); ctx.arc(t.x, t.y, 5.5, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath(); ctx.arc(t.x, t.y - 0.8, 1.3, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+
+  // Draw queue count labels above stations that have waiters
+  for (let j = 0; j < N; j++) {
+    const waitCount = tokens.filter(t => t.state === 'waiting' && t.stIdx === j).length;
+    if (waitCount > 0 && stations[j]) {
+      const st = stations[j];
+      const cols = Math.max(3, Math.min(6, Math.ceil(Math.sqrt(waitCount))));
+      const rows = Math.ceil(waitCount / cols);
+      ctx.save();
+      ctx.fillStyle = '#1a1a1866';
+      ctx.font = '500 11px "IBM Plex Mono"';
+      ctx.textAlign = 'center';
+      ctx.fillText(waitCount + ' in queue', st.x, st.y - st.h/2 - 14 - rows * 10 - 8);
+      ctx.restore();
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   GANTT CHART
+   ═══════════════════════════════════════════════════════ */
+function buildGantt() {
+  const { steps, effs, bnIdx, nOrders, sched: sc, ct, tp } = state;
+  if (!sc) return;
+  const { S, E } = sc;
+  const totalT = Math.max(...E[nOrders-1]);
+  const tfd = Math.max(...E[0]);
+
+  document.getElementById('gantt-info').textContent =
+    `${nOrders} orders · 1st at ${fmt(tfd,1)}m · then every ${fmt(ct,1)}m`;
+
+  const cv = document.getElementById('gantt'); cv.innerHTML = '';
+
+  const rawI = totalT / 7;
+  const nice = [1,2,5,10,15,20,30,60];
+  const tI = nice.find(v => v >= rawI) || 60;
+  const ticks = []; for (let t = 0; t <= totalT+.1; t += tI) ticks.push(Math.round(t*10)/10);
+
+  const colors = stations.map(s => s.color);
+
+  steps.forEach((s, j) => {
+    if (j > 0) { const sp = document.createElement('div'); sp.className='gsep'; cv.appendChild(sp); }
+    const isBn = j===bnIdx && s.eff>0;
+    const row = document.createElement('div'); row.className='gr';
+    const lbl = document.createElement('div'); lbl.className='gl'+(isBn?' bn':'');
+    lbl.textContent = s.name.split('&')[0].trim();
+    row.appendChild(lbl);
+
+    const trk = document.createElement('div'); trk.className='gt';
+    ticks.forEach(t => { if (t>0 && t<totalT) {
+      const g = document.createElement('div'); g.className='ggrid';
+      g.style.left = (t/totalT*100)+'%'; trk.appendChild(g);
+    }});
+
+    for (let i = 0; i < nOrders; i++) {
+      if (!s.eff) continue;
+      const l = (S[i][j]/totalT)*100, w = (s.eff/totalT)*100;
+      const c = colors[j] || '#0891b2';
+      const b = document.createElement('div'); b.className='gb';
+      b.style.cssText = `left:${l}%;width:${w}%;background:${c}18;border-color:${c}55;color:${c}`;
+      if (w > 4) b.textContent = `#${i+1}`;
+      trk.appendChild(b);
+    }
+    row.appendChild(trk); cv.appendChild(row);
+  });
+
+  // Annotation: first delivery line
+  const rowH=22, sepH=1;
+  const totalRowH = steps.length*rowH + (steps.length-1)*sepH;
+  const ann = document.createElement('div'); ann.className='gann'; ann.style.height=totalRowH+'px';
+  if (tfd>0 && tfd<totalT) {
+    const p = (tfd/totalT)*100;
+    ann.innerHTML += `<div class="gann-line" style="left:${p}%;height:${totalRowH}px;border-color:var(--green);opacity:.45"></div>`;
+    ann.innerHTML += `<div class="gann-tag" style="left:calc(${p}% + 3px);top:1px;background:#dcfce7;color:var(--green)">1st: ${fmt(tfd,1)}m</div>`;
+  }
+  cv.appendChild(ann);
+
+  // Axis
+  const axR = document.createElement('div'); axR.className='gax';
+  const axS = document.createElement('div'); axS.className='gax-sp'; axR.appendChild(axS);
+  const axT = document.createElement('div'); axT.className='gax-t';
+  ticks.forEach(t => {
+    const tk = document.createElement('div'); tk.className='gtick'+(t===0?' gtick-0':'');
+    tk.style.left=(t/totalT*100)+'%'; tk.textContent=fmt(t)+'m'; axT.appendChild(tk);
+  });
+  axR.appendChild(axT); cv.appendChild(axR);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN LOOP
+   ═══════════════════════════════════════════════════════ */
+let lastTs = 0;
+
+function onUpdate() {
+  compute();
+  layoutStations();
+  updateSidebar();
+  buildGantt();
+  // Adjust existing tokens to new station positions — don't reset
+  tokens.forEach(t => {
+    if (t.stIdx < N && stations[t.stIdx]) {
+      const st = stations[t.stIdx];
+      if (t.state === 'processing') {
+        t.targetX = st.x;
+        t.targetY = st.y;
+      }
+      // waiting tokens get repositioned by simStep's queue logic
+    }
+  });
+}
+
+function animate(ts) {
+  const dt = lastTs ? Math.min(ts - lastTs, 50) : 16;
+  lastTs = ts;
+  simStep(dt);
+  drawCanvas(ts);
+  requestAnimationFrame(animate);
+}
+
+function init() {
+  buildSidebar();
+  compute();
+  resizeCanvas();
+  onUpdate();
+  window.addEventListener('resize', () => { resizeCanvas(); });
+  requestAnimationFrame(animate);
+}
+
+init();
+</script>
+</body>
+</html>

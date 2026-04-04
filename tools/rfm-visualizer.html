@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFM Segmentation</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:       #f5f4f0;
+  --surface:  #eeede8;
+  --card:     #e8e7e2;
+  --border:   #d0cfc8;
+  --border2:  #c0bfb8;
+  --text:     #1a1a18;
+  --muted:    #888880;
+  --dim:      #d8d7d0;
+
+  /* recency dot colors — kept vivid for contrast on light bg */
+  --hot:      #16a34a;
+  --warm:     #d97706;
+  --cold:     #dc2626;
+
+  --font:      'IBM Plex Mono', 'Courier New', monospace;
+  --font-head: 'Syne', var(--font);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* ── HEADER ────────────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-rows: 36px 72px 1fr 190px;
+  grid-template-columns: 1fr 272px;
+  grid-template-areas:
+    "nav   nav"
+    "ttl   ttl"
+    "viz   side"
+    "defs  side";
+  height: 100vh;
+  min-height: 500px;
+}
+
+nav {
+  grid-area: nav;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.8rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.nav-back {
+  font-family: var(--font);
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.nav-back:hover { color: var(--text); }
+
+.nav-crumb {
+  font-family: var(--font);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.page-title {
+  grid-area: ttl;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1.8rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-title h1 {
+  font-family: var(--font);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.page-title .sub {
+  font-family: var(--font);
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  letter-spacing: 0.01em;
+}
+
+/* ── VIZ ───────────────────────────────────────────────── */
+.viz {
+  grid-area: viz;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+#rfm { display: block; width: 100%; height: 100%; }
+
+/* ── DEFS STRIP ────────────────────────────────────────── */
+.defs {
+  grid-area: defs;
+  border-top: 1px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--surface);
+}
+.defs::-webkit-scrollbar { display: none; }
+
+.dc {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.7rem 0.85rem;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+  border-top: 2px solid transparent;
+}
+.dc:last-child { border-right: none; }
+.dc:hover, .dc.hi { background: var(--card); border-top-color: var(--border2); }
+
+.dc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.dc-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.dc-n {
+  margin-left: auto;
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.dc-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.dc-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+}
+
+.dc-rule-key {
+  color: var(--muted);
+  font-weight: 500;
+  min-width: 14px;
+  letter-spacing: 0.04em;
+}
+
+.rpill {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 2px;
+  background: var(--dim);
+  color: var(--text);
+}
+
+.rpill.hot  { background: #dcfce7; color: #15803d; }
+.rpill.warm { background: #fef3c7; color: #a16207; }
+.rpill.cold { background: #fee2e2; color: #dc2626; }
+.rpill.freq { background: #ede9fe; color: #6d28d9; }
+.rpill.high { background: #fef3c7; color: #92400e; }
+.rpill.mid  { background: #dbeafe; color: #1d4ed8; }
+.rpill.any  { background: none; border: 1px solid var(--border2); color: var(--muted); }
+.rpill.new7 { background: #f3e8ff; color: #7c3aed; }
+
+.dc-desc {
+  font-size: 0.66rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── SIDEBAR ───────────────────────────────────────────── */
+.side {
+  grid-area: side;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--dim) transparent;
+}
+
+.ss {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.st {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+/* band strip */
+.bstrip {
+  display: flex;
+  height: 24px;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 0.7rem;
+}
+.bseg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #fff;
+  transition: flex 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* dual slider */
+.dslider {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.dtrack {
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: var(--border2);
+  border-radius: 2px;
+}
+.dslider input[type=range] {
+  -webkit-appearance: none;
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  pointer-events: none;
+}
+.dslider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: all;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2.5px solid var(--bg);
+  cursor: grab;
+  transition: transform 0.1s;
+  box-shadow: 0 1px 5px #0003;
+}
+.dslider input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+
+/* slider threshold labels — shown below each handle */
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+  position: relative;
+}
+.slider-label-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.slider-label-arrow {
+  font-size: 0.6rem;
+  color: var(--muted);
+  line-height: 1;
+}
+.slider-label-val {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--dim);
+  padding: 0.12rem 0.45rem;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.slider-label-desc {
+  font-size: 0.6rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* single slider */
+.smeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.slbl { font-size: 0.72rem; color: var(--text); }
+.sval {
+  font-family: var(--font-head);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--dim);
+  padding: 0.12rem 0.5rem;
+  border-radius: 2px;
+}
+input[type=range].single {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range].single::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px #0002;
+  transition: transform 0.1s;
+  cursor: pointer;
+}
+input[type=range].single::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.bend { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--muted); margin-top: 0.3rem; }
+
+/* encoding key */
+.ekey { display: flex; flex-direction: column; gap: 0.5rem; }
+.erow { display: flex; align-items: center; gap: 0.55rem; font-size: 0.72rem; color: var(--muted); }
+.erow strong { color: var(--text); font-weight: 600; }
+.rcols { display: flex; gap: 0.6rem; margin-top: 0.35rem; flex-wrap: wrap; }
+.rcoli { display: flex; align-items: center; gap: 0.3rem; font-size: 0.67rem; color: var(--muted); }
+.rdot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* stats */
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+.sbox { background: var(--dim); border-radius: 2px; padding: 0.55rem 0.6rem; }
+.slb { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.svl { font-family: var(--font-head); font-size: 1.1rem; font-weight: 800; color: var(--text); margin-top: 0.1rem; }
+
+/* reshuffle */
+.rbtn {
+  display: block;
+  width: calc(100% - 2.2rem);
+  margin: 0.8rem 1.1rem;
+  padding: 0.6rem;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.rbtn:hover { border-color: var(--text); color: var(--text); }
+
+/* ── TOOLTIP ───────────────────────────────────────────── */
+.tt {
+  position: fixed;
+  background: #ffffffe8;
+  border: 1px solid var(--border2);
+  padding: 0.65rem 0.9rem;
+  border-radius: 3px;
+  font-family: var(--font);
+  font-size: 0.7rem;
+  pointer-events: none;
+  z-index: 300;
+  min-width: 168px;
+  opacity: 0;
+  transition: opacity 0.1s;
+  box-shadow: 0 4px 16px #0000000f;
+  backdrop-filter: blur(4px);
+}
+.tt.on { opacity: 1; }
+.tt-name { font-family: var(--font-head); font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.tt-row { display: flex; justify-content: space-between; gap: 0.7rem; color: var(--muted); margin-top: 0.15rem; align-items: center; }
+.tt-row span:last-child { color: var(--text); }
+.tt-seg { margin-top: 0.45rem; font-size: 0.72rem; font-weight: 600; }
+.tpill { font-size: 0.62rem; padding: 0.06rem 0.35rem; border-radius: 2px; font-weight: 700; color: #fff; }
+/* ── EXPLAINER ──────────────────────────────────────────── */
+.explainer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 3rem 2rem 4rem;
+}
+
+.ex-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.ex-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.ex-title {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+  line-height: 1.2;
+}
+
+.ex-lead {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 2rem;
+  max-width: 640px;
+}
+
+.ex-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.ex-card {
+  background: var(--bg);
+  padding: 1.2rem 1.3rem;
+}
+
+.ex-card-label {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.ex-card-letter {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.ex-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.ex-card-body {
+  font-size: 0.74rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.ex-card-example {
+  margin-top: 0.6rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+  border-left: 2px solid var(--border2);
+  padding-left: 0.6rem;
+  line-height: 1.5;
+}
+
+.ex-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.ex-h2 {
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.7rem;
+}
+
+.ex-p {
+  font-size: 0.78rem;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  max-width: 680px;
+}
+
+.ex-seg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+  margin-top: 1rem;
+}
+
+.ex-seg-table th {
+  text-align: left;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ex-seg-table td {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ex-seg-table td:first-child {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ex-seg-table tr:last-child td { border-bottom: none; }
+
+.ex-formula {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+  font-size: 0.68rem;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.ex-formula strong { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav>
+    <a class="nav-back" href="/">← antolinjm</a>
+    <span class="nav-crumb">tools / rfm</span>
+  </nav>
+
+  <div class="page-title">
+    <h1>RFM Segmentation</h1>
+    <span class="sub">Recency, Frequency, Monetary — 100 synthetic customers, live clustering.</span>
+  </div>
+
+  <div class="viz"><canvas id="rfm"></canvas></div>
+
+  <div class="defs" id="defs"></div>
+
+  <div class="side">
+    <div class="ss">
+      <div class="st">Recency · days since last purchase</div>
+      <div class="bstrip">
+        <div class="bseg" id="r-cold" style="background:#dc2626">COLD</div>
+        <div class="bseg" id="r-warm" style="background:#d97706">WARM</div>
+        <div class="bseg" id="r-hot"  style="background:#16a34a">HOT</div>
+      </div>
+      <div class="dslider">
+        <div class="dtrack"></div>
+        <input type="range" id="r-lo" min="1" max="363" value="30">
+        <input type="range" id="r-hi" min="2" max="364" value="90">
+      </div>
+      <div class="slider-labels">
+        <div class="slider-label-item">
+          <span class="slider-label-desc">warm → hot</span>
+          <span class="slider-label-val" id="r-lo-v">30d</span>
+        </div>
+        <div class="slider-label-item">
+          <span class="slider-label-desc">cold → warm</span>
+          <span class="slider-label-val" id="r-hi-v">90d</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss">
+      <div class="st">Monetary · spend per month (€)</div>
+      <div class="bstrip">
+        <div class="bseg" id="m-low"  style="background:#94a3b8">LOW</div>
+        <div class="bseg" id="m-mid"  style="background:#2563eb">MID</div>
+        <div class="bseg" id="m-high" style="background:#d97706">HIGH</div>
+      </div>
+      <div class="dslider">
+        <div class="dtrack"></div>
+        <input type="range" id="m-lo" min="0" max="1990" step="10" value="100">
+        <input type="range" id="m-hi" min="10" max="2000" step="10" value="500">
+      </div>
+      <div class="slider-labels">
+        <div class="slider-label-item">
+          <span class="slider-label-desc">low → mid</span>
+          <span class="slider-label-val" id="m-lo-v">€100</span>
+        </div>
+        <div class="slider-label-item">
+          <span class="slider-label-desc">mid → high</span>
+          <span class="slider-label-val" id="m-hi-v">€500</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss">
+      <div class="st">Frequency · purchases / month</div>
+      <div class="smeta">
+        <span class="slbl">Threshold "frequent"</span>
+        <span class="sval" id="f-val">3×</span>
+      </div>
+      <input type="range" class="single" id="f-sl" min="1" max="12" step="1" value="3">
+      <div class="bend"><span>1× / mo</span><span>12× / mo</span></div>
+    </div>
+
+    <div class="ss">
+      <div class="st">Visual encoding</div>
+      <div class="ekey">
+        <div class="erow">
+          <svg width="13" height="13" viewBox="0 0 13 13"><polygon points="6.5,1 12,12 1,12" fill="#1a1a1888"/></svg>
+          <span><strong>Shape</strong> = segment type</span>
+        </div>
+        <div class="erow">
+          <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5" fill="var(--hot)"/></svg>
+          <span><strong>Color</strong> = recency band</span>
+        </div>
+        <div class="erow">
+          <svg width="20" height="13" viewBox="0 0 20 13">
+            <circle cx="4" cy="6.5" r="3" fill="#1a1a1844"/>
+            <circle cx="15" cy="6.5" r="5.5" fill="#1a1a1888"/>
+          </svg>
+          <span><strong>Size</strong> = monthly spend</span>
+        </div>
+        <div class="rcols">
+          <div class="rcoli"><span class="rdot" style="background:var(--hot)"></span><span id="leg-hot">≤30d HOT</span></div>
+          <div class="rcoli"><span class="rdot" style="background:var(--warm)"></span><span id="leg-warm">≤90d WARM</span></div>
+          <div class="rcoli"><span class="rdot" style="background:var(--cold)"></span><span>COLD</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss">
+      <div class="st">Overview</div>
+      <div class="sgrid" id="stats"></div>
+    </div>
+
+    <button class="rbtn" id="reshuffle">↺ &nbsp;reshuffle customers</button>
+  </div>
+</div>
+
+<!-- ── EXPLAINER ─────────────────────────────────────── -->
+<section class="explainer">
+  <div class="ex-inner">
+
+    <div class="ex-label">Methodology</div>
+    <h2 class="ex-title">What is RFM Segmentation?</h2>
+    <p class="ex-lead">RFM is a behavior-based framework for ranking and grouping customers by how recently they bought, how often they buy, and how much they spend. It turns raw transaction data into actionable segments — no machine learning required.</p>
+
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ex-card-label">Dimension 1</div>
+        <div class="ex-card-letter">R</div>
+        <div class="ex-card-title">Recency</div>
+        <div class="ex-card-body">Days since the customer's last purchase. The most predictive single metric — a customer who bought yesterday is far more likely to buy again than one who bought a year ago.</div>
+        <div class="ex-card-example">In this tool: HOT ≤ 30d · WARM ≤ 90d · COLD > 90d (adjustable)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-card-label">Dimension 2</div>
+        <div class="ex-card-letter">F</div>
+        <div class="ex-card-title">Frequency</div>
+        <div class="ex-card-body">Number of purchases per month. High-frequency customers have stronger habits, higher switching costs, and better LTV predictability. It signals loyalty even when recency dips.</div>
+        <div class="ex-card-example">In this tool: a binary threshold separates "frequent" from "infrequent" (adjustable)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-card-label">Dimension 3</div>
+        <div class="ex-card-letter">M</div>
+        <div class="ex-card-title">Monetary</div>
+        <div class="ex-card-body">Average monthly spend in €. Monetary value drives prioritization — a Champions customer spending €1,500/mo deserves a different retention investment than one spending €50/mo.</div>
+        <div class="ex-card-example">In this tool: LOW · MID · HIGH bands (adjustable) · dot size encodes spend visually</div>
+      </div>
+    </div>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Why it matters in retail</h3>
+    <p class="ex-p">Not all customers deserve the same marketing investment. RFM lets you concentrate budget where it generates the highest return — retaining Champions, reactivating At Risk customers before they churn, and converting Promising customers before they cool off. A company spending the same on a Lost customer as a Loyal one is burning margin.</p>
+    <p class="ex-p">The framework is deliberately simple — which is a feature, not a bug. It works with a single transactions table, runs in SQL in minutes, and produces segments that any team can understand and act on without a data science degree.</p>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">Segment reference</h3>
+    <table class="ex-seg-table">
+      <thead>
+        <tr>
+          <th>Segment</th>
+          <th>Definition</th>
+          <th>Recommended action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Champions</td><td>HOT · frequent · HIGH spend</td><td>Loyalty rewards, early access, referral programs. Don't over-discount — they already love you.</td></tr>
+        <tr><td>Loyal</td><td>HOT · frequent · MID or LOW spend</td><td>Upsell to higher-value products. Cross-sell adjacent categories. Increase basket size.</td></tr>
+        <tr><td>Potential</td><td>HOT · infrequent · MID or HIGH spend</td><td>Trigger repurchase with email sequences. Subscription offers. Show what they're missing.</td></tr>
+        <tr><td>New</td><td>First purchase ≤ 7 days ago</td><td>Onboarding is critical. First 30 days determine long-term retention. Welcome series + second-purchase incentive.</td></tr>
+        <tr><td>Promising</td><td>WARM recency · any F/M</td><td>Re-engage before going cold. Personalized nudge, limited-time offer, recommendation based on past behavior.</td></tr>
+        <tr><td>At Risk</td><td>WARM recency · frequent (historically)</td><td>Highest urgency. Were loyal, now drifting. Direct outreach, win-back campaign, ask why they stopped.</td></tr>
+        <tr><td>Lost</td><td>COLD recency (any F/M)</td><td>Low ROI. Test win-back with a strong offer on a random subset. If no response, suppress from active campaigns.</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="ex-divider">
+
+    <h3 class="ex-h2">How to score in SQL</h3>
+    <p class="ex-p">RFM scoring requires only a standard orders table with three columns: customer_id, order_date, order_value.</p>
+    <div class="ex-formula">
+      <strong>-- Step 1: compute raw RFM values per customer</strong><br>
+      SELECT customer_id,<br>
+      &nbsp;&nbsp;DATEDIFF(CURRENT_DATE, MAX(order_date)) AS recency_days,<br>
+      &nbsp;&nbsp;COUNT(*) / NULLIF(DATEDIFF(MAX(order_date), MIN(order_date)) / 30.0, 0) AS freq_per_month,<br>
+      &nbsp;&nbsp;SUM(order_value) / NULLIF(COUNT(DISTINCT DATE_FORMAT(order_date,'%Y-%m')), 0) AS spend_per_month<br>
+      FROM orders GROUP BY customer_id;<br><br>
+      <strong>-- Step 2: assign bands then map to segments</strong><br>
+      CASE<br>
+      &nbsp;&nbsp;WHEN recency_days &gt; :cold_threshold THEN 'lost'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= 7 THEN 'new'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= :hot_threshold AND freq_per_month &gt;= :freq_th AND spend_per_month &gt; :m_high THEN 'champions'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= :hot_threshold AND freq_per_month &gt;= :freq_th THEN 'loyal'<br>
+      &nbsp;&nbsp;WHEN recency_days &lt;= :hot_threshold THEN 'potential'<br>
+      &nbsp;&nbsp;WHEN freq_per_month &gt;= :freq_th THEN 'at_risk'<br>
+      &nbsp;&nbsp;ELSE 'promising'<br>
+      END AS segment
+    </div>
+
+  </div>
+</section>
+
+<div class="tt" id="tt">
+  <div class="tt-name" id="tt-nm"></div>
+  <div class="tt-row"><span>Last purchase</span><span id="tt-r"></span></div>
+  <div class="tt-row"><span>Recency</span><span id="tt-rb"></span></div>
+  <div class="tt-row"><span>Purchases / mo</span><span id="tt-f"></span></div>
+  <div class="tt-row"><span>Monthly spend</span><span id="tt-m"></span></div>
+  <div class="tt-seg" id="tt-sg"></div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════
+// SEGMENTS — each has a UNIQUE shape
+// ═══════════════════════════════════════════════════════════
+const SEGS = {
+  champions: {
+    label: 'Champions', col: '#b45309', shape: 'diamond',
+    rules: { R:'HOT', F:'FREQUENT', M:'HIGH' },
+    desc: 'Recent, frequent, high spend. Reward & leverage for referrals.',
+  },
+  loyal: {
+    label: 'Loyal', col: '#15803d', shape: 'circle',
+    rules: { R:'HOT', F:'FREQUENT', M:'MID/LOW' },
+    desc: 'Engaged frequent buyers. Upsell and deepen the relationship.',
+  },
+  potential: {
+    label: 'Potential', col: '#1d4ed8', shape: 'hexagon',
+    rules: { R:'HOT', F:'INFREQ', M:'MID/HIGH' },
+    desc: 'Recent but sporadic. Activate with targeted campaigns.',
+  },
+  new: {
+    label: 'New', col: '#7c3aed', shape: 'star',
+    rules: { R:'≤7d', F:'ANY', M:'ANY' },
+    desc: 'First purchase within 7 days. Critical onboarding window.',
+  },
+  promising: {
+    label: 'Promising', col: '#a16207', shape: 'triangle',
+    rules: { R:'WARM', F:'ANY', M:'ANY' },
+    desc: 'Cooling off. Nurture before they drift to cold.',
+  },
+  atrisk: {
+    label: 'At Risk', col: '#c2410c', shape: 'square',
+    rules: { R:'WARM', F:'FREQUENT', M:'ANY' },
+    desc: 'Were frequent buyers, now drifting. Re-engage urgently.',
+  },
+  lost: {
+    label: 'Lost', col: '#991b1b', shape: 'cross',
+    rules: { R:'COLD', F:'ANY', M:'ANY' },
+    desc: 'Long inactive regardless of past value. Win-back or deprioritize.',
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+// BOX GRID
+// Layout: 4 columns × 3 rows
+//   col 0 = COLD (right side — more days ago = left on screen? 
+//           No: left=old/cold, right=recent/hot — matching "more recent →")
+//   col 0=COLD, col 1=WARM, col 2=HOT-infreq, col 3=HOT-freq+NEW
+//   row 0=top (high freq / new), row 1=mid, row 2=bottom (low freq)
+//
+// [col, row, colSpan, rowSpan]
+// ═══════════════════════════════════════════════════════════
+const GCOLS = 4, GROWS = 3;
+
+const BOXES = {
+  lost:      [0, 0, 1, 3],   // COLD col, all rows
+  atrisk:    [1, 0, 1, 1],   // WARM, top (frequent)
+  promising: [1, 1, 1, 2],   // WARM, mid+bottom (infrequent)
+  new:       [2, 0, 2, 1],   // HOT, top row — spans both HOT cols (priority over champions/loyal visually)
+  champions: [3, 1, 1, 1],   // HOT-freq, mid (high spend)
+  loyal:     [2, 1, 1, 1],   // HOT-freq, mid (low/mid spend) — wait, loyal=freq so col3
+  potential: [2, 2, 2, 1],   // HOT-infreq, bottom
+};
+
+// Cleaner layout — rethink:
+// Col 0: COLD → Lost (all rows)
+// Col 1: WARM → AtRisk (top, frequent), Promising (bottom, any)  
+// Col 2: HOT + infrequent → New (top), Potential (bottom)
+// Col 3: HOT + frequent → Champions (top, high M), Loyal (bottom, mid/low M)
+const BOXES2 = {
+  lost:      [0, 0, 1, 3],   // cold, all
+  atrisk:    [1, 0, 1, 1],   // warm, top
+  promising: [1, 1, 1, 2],   // warm, mid+bottom
+  new:       [2, 0, 1, 1],   // hot-infreq, top (≤7d overrides everything)
+  potential: [2, 1, 1, 2],   // hot-infreq, mid+bottom
+  champions: [3, 0, 1, 1],   // hot-freq, top (high M)
+  loyal:     [3, 1, 1, 2],   // hot-freq, mid+bottom (mid/low M)
+};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let rLo=30, rHi=90, fTh=3, mLo=100, mHi=500;
+const NEW_D = 7;
+
+// ═══════════════════════════════════════════════════════════
+// CUSTOMERS
+// ═══════════════════════════════════════════════════════════
+const NAMES=['Alex','Jordan','Morgan','Taylor','Casey','Riley','Avery','Blake','Quinn','Reese',
+             'Sage','Drew','Harper','Finley','Rowan','Cameron','Dakota','Emerson','Hayden','Kendall',
+             'Sasha','Peri','Jamie','Skye','Lexi','Noel','Remy','Arlo','Eden','Wren'];
+
+function gen(){
+  return Array.from({length:100},(_,i)=>({
+    id:i, name: NAMES[i%NAMES.length]+' #'+(i+1),
+    days:  Math.round(Math.random()<0.55 ? Math.random()*89+1 : Math.random()*275+90),
+    freq:  +(Math.random()*13+1).toFixed(1),
+    spend: Math.round(Math.pow(Math.random(),1.3)*2000),
+    x:0,y:0,tx:0,ty:0,vx:0,vy:0,seg:'lost',
+  }));
+}
+
+let custs = gen();
+
+// ═══════════════════════════════════════════════════════════
+// CLASSIFY
+// Cold  = days > rHi  → always LOST
+// New   = days ≤ NEW_D (priority over hot classification)
+// Hot   = days ≤ rLo
+// Warm  = rLo < days ≤ rHi
+// ═══════════════════════════════════════════════════════════
+function rBand(c){
+  if(c.days<=NEW_D)      return 'new_hot';
+  if(c.days<=rLo)        return 'hot';
+  if(c.days<=rHi)        return 'warm';
+  return 'cold';
+}
+function mBand(c){ return c.spend>mHi?'high': c.spend>mLo?'mid':'low'; }
+
+function classify(c){
+  const rb=rBand(c), mb=mBand(c), freq=c.freq>=fTh;
+  if(rb==='cold')                            return 'lost';
+  if(rb==='new_hot')                         return 'new';
+  if(rb==='warm' && freq)                    return 'atrisk';
+  if(rb==='warm' && !freq)                   return 'promising';
+  // hot:
+  if(rb==='hot' && freq && mb==='high')      return 'champions';
+  if(rb==='hot' && freq)                     return 'loyal';
+  return 'potential';
+}
+
+// ═══════════════════════════════════════════════════════════
+// CANVAS ENGINE
+// ═══════════════════════════════════════════════════════════
+const cv  = document.getElementById('rfm');
+const ctx = cv.getContext('2d');
+const PAD = 64;  // wider left pad to fit rotated row labels
+let hIdx=-1, hSeg=null, raf;
+const K=0.022, DMP=0.5;  // gentler spring — less shuffly
+
+function boxPx(){
+  const W=cv.width, H=cv.height;
+  const gW=W-PAD*2, gH=H-PAD*2;
+  const cW=gW/GCOLS, rH=gH/GROWS;
+  const res={};
+  for(const[seg,[col,row,cs,rs]] of Object.entries(BOXES2)){
+    res[seg]={ x:PAD+col*cW, y:PAD+row*rH, w:cW*cs, h:rH*rs };
+  }
+  return res;
+}
+
+function setTargets(){
+  const bp=boxPx(); const M=20;
+  custs.forEach(c=>{
+    c.seg=classify(c);
+    const b=bp[c.seg];
+    c.tx=b.x+M+Math.random()*Math.max(1,b.w-M*2);
+    c.ty=b.y+M+Math.random()*Math.max(1,b.h-M*2);
+    c.tx=Math.max(b.x+8,Math.min(b.x+b.w-8,c.tx));
+    c.ty=Math.max(b.y+8,Math.min(b.y+b.h-8,c.ty));
+  });
+}
+
+// Color = recency band
+function dotCol(c){
+  const rb=rBand(c);
+  if(rb==='new_hot'||rb==='hot') return '#16a34a';
+  if(rb==='warm') return '#d97706';
+  return '#dc2626';
+}
+
+// Size = monetary spend
+function dotR(c){ return 4+Math.min(1,c.spend/1800)*9; }
+
+// ── Draw single dot with its unique segment shape ──────
+function drawDot(c, hov){
+  const sg=SEGS[c.seg];
+  const col=dotCol(c);
+  const r=dotR(c);
+
+  ctx.save();
+  ctx.translate(c.x, c.y);
+
+  if(hov){ ctx.shadowColor=col; ctx.shadowBlur=16; }
+
+  ctx.beginPath();
+
+  switch(sg.shape){
+    case 'circle':
+      ctx.arc(0,0,r,0,Math.PI*2);
+      break;
+
+    case 'diamond':
+      ctx.moveTo(0,-r*1.35); ctx.lineTo(r*0.95,0);
+      ctx.lineTo(0,r*1.35);  ctx.lineTo(-r*0.95,0);
+      ctx.closePath();
+      break;
+
+    case 'triangle':
+      ctx.moveTo(0,-r*1.3);
+      ctx.lineTo(r*1.1, r*0.85);
+      ctx.lineTo(-r*1.1,r*0.85);
+      ctx.closePath();
+      break;
+
+    case 'square':{
+      const s=r*0.95;
+      ctx.rect(-s,-s,s*2,s*2);
+      break;
+    }
+
+    case 'cross':{
+      const t=r*0.33, l=r*1.0;
+      ctx.moveTo(-t,-l); ctx.lineTo(t,-l); ctx.lineTo(t,-t);
+      ctx.lineTo(l,-t);  ctx.lineTo(l,t);  ctx.lineTo(t,t);
+      ctx.lineTo(t,l);   ctx.lineTo(-t,l); ctx.lineTo(-t,t);
+      ctx.lineTo(-l,t);  ctx.lineTo(-l,-t);ctx.lineTo(-t,-t);
+      ctx.closePath();
+      break;
+    }
+
+    case 'hexagon':{
+      for(let i=0;i<6;i++){
+        const a=Math.PI/180*(60*i-30);
+        i===0 ? ctx.moveTo(r*Math.cos(a),r*Math.sin(a))
+              : ctx.lineTo(r*Math.cos(a),r*Math.sin(a));
+      }
+      ctx.closePath();
+      break;
+    }
+
+    case 'star':{
+      const or=r, ir=r*0.42;
+      for(let i=0;i<10;i++){
+        const a=Math.PI/180*(36*i-90);
+        const rad=i%2===0?or:ir;
+        i===0 ? ctx.moveTo(rad*Math.cos(a),rad*Math.sin(a))
+              : ctx.lineTo(rad*Math.cos(a),rad*Math.sin(a));
+      }
+      ctx.closePath();
+      break;
+    }
+  }
+
+  ctx.fillStyle = col+(hov?'ee':'bb');
+  ctx.fill();
+
+  if(hov){
+    ctx.strokeStyle='#1a1a18';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+// ── MAIN LOOP ──────────────────────────────────────────
+function tick(){
+  const W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  const bp=boxPx();
+  const cW=(W-PAD*2)/GCOLS, rH=(H-PAD*2)/GROWS;
+
+  // ── Draw boxes ───────────────────────────────────────
+  for(const[segKey,b] of Object.entries(bp)){
+    const sg=SEGS[segKey], hov=hSeg===segKey;
+
+    // box fill — very subtle tint on light bg
+    ctx.fillStyle = hov ? sg.col+'22' : sg.col+'0c';
+    ctx.fillRect(b.x,b.y,b.w,b.h);
+
+    // border
+    ctx.strokeStyle = hov ? sg.col+'cc' : sg.col+'55';
+    ctx.lineWidth   = hov ? 1.5 : 1;
+    ctx.strokeRect(b.x+.5,b.y+.5,b.w-1,b.h-1);
+
+    // segment name — top left
+    ctx.font      = '700 13px Syne, IBM Plex Mono, monospace';
+    ctx.fillStyle = hov ? sg.col : sg.col+'aa';
+    ctx.textAlign = 'left';
+    ctx.fillText(sg.label, b.x+10, b.y+20);
+
+    // count — top right
+    const n=custs.filter(c=>c.seg===segKey).length;
+    ctx.font      = '700 13px Syne, monospace';
+    ctx.fillStyle = hov ? sg.col+'dd' : sg.col+'77';
+    ctx.textAlign = 'right';
+    ctx.fillText(n, b.x+b.w-10, b.y+20);
+  }
+
+  // ── Column zone labels (bottom axis) ─────────────────
+  const zones=[
+    { t:`COLD  (>${rHi}d)`,         c:'#dc2626cc' },
+    { t:`WARM  (${rLo}–${rHi}d)`,   c:'#d97706cc' },
+    { t:`HOT  (≤${rLo}d) · INFREQ`, c:'#16a34acc' },
+    { t:`HOT  (≤${rLo}d) · FREQ`,   c:'#16a34acc' },
+  ];
+  ctx.font='600 11px IBM Plex Mono, monospace';
+  ctx.textAlign='center';
+  [0,1,2,3].forEach(col=>{
+    const ccx=PAD+col*cW+cW/2;
+    ctx.fillStyle=zones[col].c;
+    ctx.fillText(zones[col].t, ccx, H-10);
+  });
+
+  // ── Row labels (left axis) — rotated vertically ───────
+  ctx.font='600 11px IBM Plex Mono, monospace';
+  ctx.fillStyle='#555550';
+  ctx.textAlign='center';
+  ['HIGH FREQ','MID FREQ','LOW FREQ'].forEach((lbl,row)=>{
+    const cy=PAD+row*rH+rH/2;
+    ctx.save();
+    ctx.translate(16, cy);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText(lbl, 0, 0);
+    ctx.restore();
+  });
+
+  // ── Physics ───────────────────────────────────────────
+  custs.forEach(c=>{
+    c.vx=(c.vx+(c.tx-c.x)*K)*DMP;
+    c.vy=(c.vy+(c.ty-c.y)*K)*DMP;
+    c.x+=c.vx; c.y+=c.vy;
+  });
+
+  // ── Dots ─────────────────────────────────────────────
+  custs.forEach((c,i)=>{ if(i!==hIdx) drawDot(c,false); });
+  if(hIdx>=0) drawDot(custs[hIdx],true);
+
+  raf=requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RESIZE
+// ═══════════════════════════════════════════════════════════
+function resize(){
+  const r=document.querySelector('.viz').getBoundingClientRect();
+  cv.width=r.width; cv.height=r.height;
+  setTargets();
+  if(!custs[0].x) custs.forEach(c=>{c.x=c.tx;c.y=c.ty;});
+}
+
+function initPos(){
+  custs.forEach(c=>{c.x=Math.random()*cv.width;c.y=Math.random()*cv.height;c.vx=0;c.vy=0;});
+  setTargets();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BAND STRIPS — shows % of customers per band
+// ═══════════════════════════════════════════════════════════
+function refreshStrips(){
+  // Recency
+  let rH=0,rW=0,rC=0;
+  custs.forEach(c=>{
+    const rb=rBand(c);
+    if(rb==='hot'||rb==='new_hot') rH++; else if(rb==='warm') rW++; else rC++;
+  });
+  const rT=Math.max(1,rH+rW+rC);
+  setFlex('r-hot',  rH/rT*100);
+  setFlex('r-warm', rW/rT*100);
+  setFlex('r-cold', rC/rT*100);
+
+  // Monetary
+  let mL=0,mM=0,mH=0;
+  custs.forEach(c=>{
+    const mb=mBand(c);
+    if(mb==='high') mH++; else if(mb==='mid') mM++; else mL++;
+  });
+  const mT=Math.max(1,mL+mM+mH);
+  setFlex('m-low',  mL/mT*100);
+  setFlex('m-mid',  mM/mT*100);
+  setFlex('m-high', mH/mT*100);
+
+  // threshold labels
+  document.getElementById('r-lo-v').textContent = rLo + 'd';
+  document.getElementById('r-hi-v').textContent = rHi + 'd';
+  document.getElementById('m-lo-v').textContent = '€' + mLo;
+  document.getElementById('m-hi-v').textContent = '€' + mHi;
+  document.getElementById('leg-hot').textContent  = `≤${rLo}d HOT`;
+  document.getElementById('leg-warm').textContent = `≤${rHi}d WARM`;
+}
+
+function setFlex(id, pct){
+  const el=document.getElementById(id);
+  el.style.flex = pct.toFixed(1);
+  // hide label text if band is too narrow
+  el.textContent = pct>8 ? el.id.split('-')[1].toUpperCase() : '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEF CARDS
+// ═══════════════════════════════════════════════════════════
+function pillEl(val, isAny){
+  if(isAny) return `<span class="xpill any">ANY</span>`;
+  const cmap={
+    'HOT':'#16a34a', 'WARM':'#d97706', 'COLD':'#dc2626', '≤7d':'#7c3aed',
+    'FREQUENT':'#7c3aed', 'INFREQ':'#dc2626',
+    'HIGH':'#d97706', 'MID/HIGH':'#2563eb', 'MID/LOW':'#2563eb',
+  };
+  return `<span class="xpill" style="background:${cmap[val]||'#888'}">${val}</span>`;
+}
+
+function svgIcon(shape, col, r=9){
+  const sz=r*2+4, c=r+2;
+  let p='';
+  switch(shape){
+    case 'circle':   p=`<circle cx="${c}" cy="${c}" r="${r}" fill="${col}"/>`; break;
+    case 'diamond':  p=`<polygon points="${c},2 ${sz-2},${c} ${c},${sz-2} 2,${c}" fill="${col}"/>`; break;
+    case 'triangle': p=`<polygon points="${c},1 ${sz-1},${sz-1} 1,${sz-1}" fill="${col}"/>`; break;
+    case 'square':   { const s=r*0.9; p=`<rect x="${c-s}" y="${c-s}" width="${s*2}" height="${s*2}" fill="${col}"/>`; break; }
+    case 'cross':    {
+      const t=r*.3,l=r;
+      p=`<polygon points="${c-t},${c-l} ${c+t},${c-l} ${c+t},${c-t} ${c+l},${c-t} ${c+l},${c+t} ${c+t},${c+t} ${c+t},${c+l} ${c-t},${c+l} ${c-t},${c+t} ${c-l},${c+t} ${c-l},${c-t} ${c-t},${c-t}" fill="${col}"/>`;
+      break;
+    }
+    case 'hexagon':  {
+      const pts=Array.from({length:6},(_,i)=>{const a=Math.PI/180*(60*i-30);return `${c+r*Math.cos(a)},${c+r*Math.sin(a)}`;}).join(' ');
+      p=`<polygon points="${pts}" fill="${col}"/>`;
+      break;
+    }
+    case 'star': {
+      const pts=Array.from({length:10},(_,i)=>{const a=Math.PI/180*(36*i-90);const rad=i%2===0?r:r*0.42;return `${c+rad*Math.cos(a)},${c+rad*Math.sin(a)}`;}).join(' ');
+      p=`<polygon points="${pts}" fill="${col}"/>`;
+      break;
+    }
+  }
+  return `<svg style="flex-shrink:0" width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">${p}</svg>`;
+}
+
+function renderDefs(){
+  const cnt={}; Object.keys(SEGS).forEach(k=>cnt[k]=0);
+  custs.forEach(c=>cnt[c.seg]++);
+
+  // Map rule values to pill classes
+  const pillClass = {
+    'HOT':'hot','WARM':'warm','COLD':'cold','≤7d':'new7',
+    'FREQUENT':'freq','INFREQ':'cold',
+    'HIGH':'high','MID/HIGH':'mid','MID/LOW':'mid','ANY':'any',
+  };
+
+  document.getElementById('defs').innerHTML=Object.entries(SEGS).map(([k,sg])=>{
+    const{R,F,M}=sg.rules;
+    const rp = (v)=>`<span class="rpill ${pillClass[v]||'any'}">${v}</span>`;
+    return `<div class="dc" data-seg="${k}">
+      <div class="dc-head">
+        ${svgIcon(sg.shape,'#1a1a18',9)}
+        <span class="dc-name">${sg.label}</span>
+        <span class="dc-n">${cnt[k]}</span>
+      </div>
+      <div class="dc-rules">
+        <div class="dc-rule"><span class="dc-rule-key">R</span>${rp(R)}</div>
+        <div class="dc-rule"><span class="dc-rule-key">F</span>${rp(F)}</div>
+        <div class="dc-rule"><span class="dc-rule-key">M</span>${rp(M)}</div>
+      </div>
+      <div class="dc-desc">${sg.desc}</div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.dc').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ hSeg=el.dataset.seg; el.classList.add('hi'); });
+    el.addEventListener('mouseleave',()=>{ hSeg=null; el.classList.remove('hi'); });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+function renderStats(){
+  const cnt={}; Object.keys(SEGS).forEach(k=>cnt[k]=0);
+  custs.forEach(c=>cnt[c.seg]++);
+  const avg=Math.round(custs.reduce((s,c)=>s+c.spend,0)/100);
+  document.getElementById('stats').innerHTML=`
+    <div class="sbox"><div class="slb">Avg Spend</div><div class="svl">€${avg}</div></div>
+    <div class="sbox"><div class="slb">Champions</div><div class="svl" style="color:#b45309">${cnt.champions}</div></div>
+    <div class="sbox"><div class="slb">At Risk+Lost</div><div class="svl" style="color:#dc2626">${cnt.atrisk+cnt.lost}</div></div>
+    <div class="sbox"><div class="slb">High Value</div><div class="svl" style="color:#15803d">${cnt.champions+cnt.loyal}</div></div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLIDERS
+// ═══════════════════════════════════════════════════════════
+function recompute(){
+  custs.forEach(c=>c.seg=classify(c));
+  setTargets(); refreshStrips(); renderDefs(); renderStats();
+}
+
+function bindSliders(){
+  const rlo=document.getElementById('r-lo'), rhi=document.getElementById('r-hi');
+  rlo.addEventListener('input',()=>{
+    rLo=+rlo.value; if(rLo>=rHi-1){rHi=rLo+1;rhi.value=rHi;}
+    recompute();
+  });
+  rhi.addEventListener('input',()=>{
+    rHi=+rhi.value; if(rHi<=rLo+1){rLo=rHi-1;rlo.value=rLo;}
+    recompute();
+  });
+  const mlo=document.getElementById('m-lo'), mhi=document.getElementById('m-hi');
+  mlo.addEventListener('input',()=>{
+    mLo=+mlo.value; if(mLo>=mHi-10){mHi=mLo+10;mhi.value=mHi;}
+    recompute();
+  });
+  mhi.addEventListener('input',()=>{
+    mHi=+mhi.value; if(mHi<=mLo+10){mLo=mHi-10;mlo.value=mLo;}
+    recompute();
+  });
+  document.getElementById('f-sl').addEventListener('input',e=>{
+    fTh=+e.target.value;
+    document.getElementById('f-val').textContent=fTh+'×';
+    recompute();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════════════════════
+const ttEl=document.getElementById('tt');
+cv.addEventListener('mousemove',e=>{
+  const rc=cv.getBoundingClientRect(), mx=e.clientX-rc.left, my=e.clientY-rc.top;
+  let best=-1,bestD=22;
+  custs.forEach((c,i)=>{ const d=Math.hypot(c.x-mx,c.y-my); if(d<bestD){bestD=d;best=i;} });
+  hIdx=best;
+  if(best>=0){
+    const c=custs[best], sg=SEGS[c.seg], rb=rBand(c);
+    const rcc={new_hot:'#16a34a',hot:'#16a34a',warm:'#d97706',cold:'#dc2626'};
+    const rll={new_hot:'NEW HOT',hot:'HOT',warm:'WARM',cold:'COLD'};
+    document.getElementById('tt-nm').textContent=c.name;
+    document.getElementById('tt-r').textContent=c.days+'d ago';
+    document.getElementById('tt-rb').innerHTML=`<span class="tpill" style="background:${rcc[rb]}">${rll[rb]}</span>`;
+    document.getElementById('tt-f').textContent=c.freq.toFixed(1)+'× / mo';
+    document.getElementById('tt-m').textContent='€'+c.spend+' / mo';
+    document.getElementById('tt-sg').textContent='▸ '+sg.label;
+    document.getElementById('tt-sg').style.color=sg.col;
+    ttEl.style.left=(e.clientX+16)+'px'; ttEl.style.top=(e.clientY-10)+'px';
+    ttEl.classList.add('on');
+  } else { ttEl.classList.remove('on'); }
+});
+cv.addEventListener('mouseleave',()=>{ hIdx=-1; ttEl.classList.remove('on'); });
+
+// ═══════════════════════════════════════════════════════════
+// RESHUFFLE
+// ═══════════════════════════════════════════════════════════
+document.getElementById('reshuffle').addEventListener('click',()=>{
+  custs=gen(); custs.forEach(c=>c.seg=classify(c));
+  initPos(); refreshStrips(); renderDefs(); renderStats();
+});
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('resize',()=>{ resize(); setTargets(); });
+resize(); initPos(); bindSliders(); refreshStrips(); renderDefs(); renderStats();
+cancelAnimationFrame(raf); tick();
+</script>
+</body>
+</html>
