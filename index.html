@@ -20,24 +20,29 @@
         <div class="nav-inner">
             <a href="#" class="site-title">José Manuel Antolín</a>
             <nav>
-                <a href="#experience">Work</a>
-                <a href="#consulting">Consulting</a>
-                <a href="#tools">Tools</a>
-                <a href="#contact">Contact</a>
+                <a href="#experience" data-i18n="nav.work">Work</a>
+                <a href="#consulting" data-i18n="nav.consulting">Consulting</a>
+                <a href="#tools" data-i18n="nav.tools">Tools</a>
+                <a href="#contact" data-i18n="nav.contact">Contact</a>
             </nav>
-            <a href="#contact" class="header-cta-btn">Get in touch</a>
+            <div class="lang-switch">
+                <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+                <span class="lang-sep">/</span>
+                <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+            </div>
+            <a href="#contact" class="header-cta-btn" data-i18n="nav.cta">Get in touch</a>
         </div>
     </header>
 
     <!-- Hero -->
     <section class="hero">
         <div class="section-inner fade-in">
-            <p class="hero-eyebrow">BI &amp; Analytics · Madrid</p>
-            <h1 class="hero-headline">Turning data into<br><em>commercial decisions.</em></h1>
-            <p class="hero-sub">Eight years across consulting, retail, QSR, and delivery — building the analytics infrastructure, pricing models, and CRM systems that move revenue.</p>
+            <p class="hero-eyebrow" data-i18n="hero.eyebrow">BI &amp; Analytics · Madrid</p>
+            <h1 class="hero-headline" data-i18n="hero.headline">Turning data into<br><em>commercial decisions.</em></h1>
+            <p class="hero-sub" data-i18n="hero.sub">Eight years across consulting, retail, QSR, and delivery — building the analytics infrastructure, pricing models, and CRM systems that move revenue.</p>
             <div class="hero-actions">
-                <a href="#contact" class="hero-cta-btn">Get in touch</a>
-                <span class="status-chip"><span class="avail-dot"></span>Available for consulting work</span>
+                <a href="#contact" class="hero-cta-btn" data-i18n="nav.cta">Get in touch</a>
+                <span class="status-chip"><span class="avail-dot"></span><span data-i18n="hero.status">Available for consulting work</span></span>
             </div>
         </div>
     </section>
@@ -45,20 +50,20 @@
     <!-- Experience -->
     <section id="experience" class="section-surface">
         <div class="section-inner fade-in">
-            <p class="section-label">Experience</p>
+            <p class="section-label" data-i18n="experience.label">Experience</p>
             <ul class="exp-list">
                 <li class="exp-item featured">
                     <div class="exp-meta">
                         <div class="exp-company"><a href="https://www.havaianas.com" target="_blank" rel="noopener noreferrer">Havaianas</a></div>
-                        <div class="exp-period">2025 – present</div>
-                        <div class="exp-role">BI &amp; Analytics Manager, EMEA</div>
+                        <div class="exp-period" data-i18n="experience.havaianas.period">2025 – present</div>
+                        <div class="exp-role" data-i18n="experience.havaianas.role">BI &amp; Analytics Manager, EMEA</div>
                     </div>
                     <div class="exp-content">
-                        <div class="exp-headline">Building commercial intelligence for a global brand's European operation.</div>
+                        <div class="exp-headline" data-i18n="experience.havaianas.headline">Building commercial intelligence for a global brand's European operation.</div>
                         <ul class="exp-bullets">
-                            <li>Shaping the regional analytics foundation across finance, sales and marketing</li>
-                            <li>Leading a multidisciplinary BI team and external partners</li>
-                            <li>Embedding marketing mix models and consumer data into commercial planning and pricing decisions</li>
+                            <li data-i18n="experience.havaianas.b1">Shaping the regional analytics foundation across finance, sales and marketing</li>
+                            <li data-i18n="experience.havaianas.b2">Leading a multidisciplinary BI team and external partners</li>
+                            <li data-i18n="experience.havaianas.b3">Embedding marketing mix models and consumer data into commercial planning and pricing decisions</li>
                         </ul>
                     </div>
                 </li>
@@ -66,14 +71,14 @@
                     <div class="exp-meta">
                         <div class="exp-company"><a href="https://www.cuyna.es" target="_blank" rel="noopener noreferrer">Cuyna</a></div>
                         <div class="exp-period">2022 – 2025</div>
-                        <div class="exp-role">Head of Analytics &amp; Performance Operations</div>
+                        <div class="exp-role" data-i18n="experience.cuyna.role">Head of Analytics &amp; Performance Operations</div>
                     </div>
                     <div class="exp-content">
-                        <div class="exp-headline">Built the BI backbone for a dark kitchen operator from scratch.</div>
+                        <div class="exp-headline" data-i18n="experience.cuyna.headline">Built the BI backbone for a dark kitchen operator from scratch.</div>
                         <ul class="exp-bullets">
-                            <li><strong>€1.2M+ in savings</strong> via BI platforms and algorithmic labor scheduling</li>
-                            <li>Designed and deployed the full data stack: ingestion, modelling, dashboards</li>
-                            <li>Embedded analytics across ops, finance, and commercial teams</li>
+                            <li data-i18n="experience.cuyna.b1"><strong>€1.2M+ in savings</strong> via BI platforms and algorithmic labor scheduling</li>
+                            <li data-i18n="experience.cuyna.b2">Designed and deployed the full data stack: ingestion, modelling, dashboards</li>
+                            <li data-i18n="experience.cuyna.b3">Embedded analytics across ops, finance, and commercial teams</li>
                         </ul>
                     </div>
                 </li>
@@ -81,13 +86,13 @@
                     <div class="exp-meta">
                         <div class="exp-company"><a href="https://www.mcdonalds.es" target="_blank" rel="noopener noreferrer">McDonald's Spain</a></div>
                         <div class="exp-period">2020 – 2022</div>
-                        <div class="exp-role">Strategy &amp; Insights</div>
+                        <div class="exp-role" data-i18n="experience.mcdonalds.role">Strategy &amp; Insights</div>
                     </div>
                     <div class="exp-content">
-                        <div class="exp-headline">Pricing and loyalty at scale.</div>
+                        <div class="exp-headline" data-i18n="experience.mcdonalds.headline">Pricing and loyalty at scale.</div>
                         <ul class="exp-bullets">
-                            <li>Elasticity-based pricing optimization — <strong>+3% topline</strong></li>
-                            <li>Loyalty program from zero to <strong>millions of users</strong> in under 18 months</li>
+                            <li data-i18n="experience.mcdonalds.b1">Elasticity-based pricing optimization — <strong>+3% topline</strong></li>
+                            <li data-i18n="experience.mcdonalds.b2">Loyalty program from zero to <strong>millions of users</strong> in under 18 months</li>
                         </ul>
                     </div>
                 </li>
@@ -95,13 +100,13 @@
                     <div class="exp-meta">
                         <div class="exp-company"><a href="https://glovoapp.com" target="_blank" rel="noopener noreferrer">Glovo</a></div>
                         <div class="exp-period">2019 – 2020</div>
-                        <div class="exp-role">Senior Global Data Analyst</div>
+                        <div class="exp-role" data-i18n="experience.glovo.role">Senior Global Data Analyst</div>
                     </div>
                     <div class="exp-content">
-                        <div class="exp-headline">Growth analytics in a fast-scaling Q-commerce environment.</div>
+                        <div class="exp-headline" data-i18n="experience.glovo.headline">Growth analytics in a fast-scaling Q-commerce environment.</div>
                         <ul class="exp-bullets">
-                            <li>Growth experimentation, LTV modelling, and churn prediction</li>
-                            <li>CRM personalization at global scale via Braze</li>
+                            <li data-i18n="experience.glovo.b1">Growth experimentation, LTV modelling, and churn prediction</li>
+                            <li data-i18n="experience.glovo.b2">CRM personalization at global scale via Braze</li>
                         </ul>
                     </div>
                 </li>
@@ -109,13 +114,13 @@
                     <div class="exp-meta">
                         <div class="exp-company"><a href="https://www.deloittedigital.com" target="_blank" rel="noopener noreferrer">Deloitte Digital</a></div>
                         <div class="exp-period">2017 – 2019</div>
-                        <div class="exp-role">Strategy Consultant</div>
+                        <div class="exp-role" data-i18n="experience.deloitte.role">Strategy Consultant</div>
                     </div>
                     <div class="exp-content">
-                        <div class="exp-headline">Strategy, analytics, and cross-functional delivery across multiple sectors.</div>
+                        <div class="exp-headline" data-i18n="experience.deloitte.headline">Strategy, analytics, and cross-functional delivery across multiple sectors.</div>
                         <ul class="exp-bullets">
-                            <li>Salesforce Marketing Cloud CRM redesign for a major automotive client</li>
-                            <li>Consulting foundations in data strategy and commercial analytics</li>
+                            <li data-i18n="experience.deloitte.b1">Salesforce Marketing Cloud CRM redesign for a major automotive client</li>
+                            <li data-i18n="experience.deloitte.b2">Consulting foundations in data strategy and commercial analytics</li>
                         </ul>
                     </div>
                 </li>
@@ -126,39 +131,39 @@
     <!-- Consulting -->
     <section id="consulting" class="section-bg">
         <div class="section-inner fade-in">
-            <p class="section-label">Consulting</p>
+            <p class="section-label" data-i18n="consulting.label">Consulting</p>
             <div class="consulting-block">
-                <h2 class="consulting-title">Selected engagements, not full-time roles.</h2>
-                <p class="consulting-desc">I work with companies that need sharp analytical thinking applied to real commercial problems — pricing, retention, BI architecture, or data strategy. Typically 2–8 week engagements, remote or Madrid-based.</p>
+                <h2 class="consulting-title" data-i18n="consulting.title">Selected engagements, not full-time roles.</h2>
+                <p class="consulting-desc" data-i18n="consulting.desc">I work with companies that need sharp analytical thinking applied to real commercial problems — pricing, retention, BI architecture, or data strategy. Typically 2–8 week engagements, remote or Madrid-based.</p>
                 <div class="consulting-areas">
                     <div class="consulting-area">
-                        <div class="consulting-area-title">BI Strategy &amp; Architecture</div>
-                        <div class="consulting-area-desc">Modern stack design, legacy migration, team structure, tooling decisions</div>
+                        <div class="consulting-area-title" data-i18n="consulting.areas.bi.title">BI Strategy &amp; Architecture</div>
+                        <div class="consulting-area-desc" data-i18n="consulting.areas.bi.desc">Modern stack design, legacy migration, team structure, tooling decisions</div>
                     </div>
                     <div class="consulting-area">
-                        <div class="consulting-area-title">Pricing Analytics</div>
-                        <div class="consulting-area-desc">Elasticity modelling, revenue optimization, markdown and promo effectiveness</div>
+                        <div class="consulting-area-title" data-i18n="consulting.areas.pricing.title">Pricing Analytics</div>
+                        <div class="consulting-area-desc" data-i18n="consulting.areas.pricing.desc">Elasticity modelling, revenue optimization, markdown and promo effectiveness</div>
                     </div>
                     <div class="consulting-area">
-                        <div class="consulting-area-title">Retention &amp; CRM</div>
-                        <div class="consulting-area-desc">Churn prediction, segmentation, lifecycle design, platform implementation</div>
+                        <div class="consulting-area-title" data-i18n="consulting.areas.crm.title">Retention &amp; CRM</div>
+                        <div class="consulting-area-desc" data-i18n="consulting.areas.crm.desc">Churn prediction, segmentation, lifecycle design, platform implementation</div>
                     </div>
                     <div class="consulting-area">
-                        <div class="consulting-area-title">Commercial Analytics</div>
-                        <div class="consulting-area-desc">LTV modelling, channel attribution, MMM, growth experimentation</div>
+                        <div class="consulting-area-title" data-i18n="consulting.areas.commercial.title">Commercial Analytics</div>
+                        <div class="consulting-area-desc" data-i18n="consulting.areas.commercial.desc">LTV modelling, channel attribution, MMM, growth experimentation</div>
                     </div>
                     <div class="consulting-area">
-                        <div class="consulting-area-title">Data Team Building</div>
-                        <div class="consulting-area-desc">Hiring frameworks, analyst onboarding, ways of working, stakeholder alignment</div>
+                        <div class="consulting-area-title" data-i18n="consulting.areas.team.title">Data Team Building</div>
+                        <div class="consulting-area-desc" data-i18n="consulting.areas.team.desc">Hiring frameworks, analyst onboarding, ways of working, stakeholder alignment</div>
                     </div>
                     <div class="consulting-area">
-                        <div class="consulting-area-title">Sectors</div>
-                        <div class="consulting-area-desc">Retail · Consumer goods · QSR · Delivery · D2C · FMCG</div>
+                        <div class="consulting-area-title" data-i18n="consulting.areas.sectors.title">Sectors</div>
+                        <div class="consulting-area-desc" data-i18n="consulting.areas.sectors.desc">Retail · Consumer goods · QSR · Delivery · D2C · FMCG</div>
                     </div>
                 </div>
                 <div class="consulting-footer">
-                    <div class="consulting-availability"><span class="avail-dot"></span>Available for new projects</div>
-                    <a href="#contact" class="consulting-email-btn">Get in touch</a>
+                    <div class="consulting-availability"><span class="avail-dot"></span><span data-i18n="consulting.availability">Available for new projects</span></div>
+                    <a href="#contact" class="consulting-email-btn" data-i18n="nav.cta">Get in touch</a>
                 </div>
             </div>
         </div>
@@ -167,10 +172,10 @@
     <!-- Stack -->
     <section id="stack" class="section-surface">
         <div class="section-inner fade-in">
-            <p class="section-label">Stack</p>
+            <p class="section-label" data-i18n="stack.label">Stack</p>
             <div class="stack-categories">
                 <div class="stack-category">
-                    <div class="stack-category-label">Data &amp; Engineering</div>
+                    <div class="stack-category-label" data-i18n="stack.dataeng">Data &amp; Engineering</div>
                     <div class="stack-chips">
                         <span class="stack-chip">Python</span>
                         <span class="stack-chip">SQL</span>
@@ -180,7 +185,7 @@
                     </div>
                 </div>
                 <div class="stack-category">
-                    <div class="stack-category-label">Visualisation &amp; BI</div>
+                    <div class="stack-category-label" data-i18n="stack.visbi">Visualisation &amp; BI</div>
                     <div class="stack-chips">
                         <span class="stack-chip">Power BI</span>
                         <span class="stack-chip">Looker</span>
@@ -188,7 +193,7 @@
                     </div>
                 </div>
                 <div class="stack-category">
-                    <div class="stack-category-label">CRM &amp; Activation</div>
+                    <div class="stack-category-label" data-i18n="stack.crm">CRM &amp; Activation</div>
                     <div class="stack-chips">
                         <span class="stack-chip">Salesforce MC</span>
                         <span class="stack-chip">Braze</span>
@@ -202,19 +207,19 @@
     <!-- Tools -->
     <section id="tools" class="section-bg">
         <div class="section-inner fade-in">
-            <p class="section-label">Tools</p>
+            <p class="section-label" data-i18n="tools.label">Tools</p>
             <div class="tools-grid">
                 <a href="tools/ltv-cac-calculator.html" class="tool-card">
                     <div class="tool-card-title">LTV / CAC Calculator</div>
-                    <div class="tool-card-desc">Retail &amp; subscription unit economics · 2026</div>
+                    <div class="tool-card-desc" data-i18n="tools.ltv.desc">Retail &amp; subscription unit economics · 2026</div>
                 </a>
                 <a href="tools/rfm-visualizer.html" class="tool-card">
                     <div class="tool-card-title">RFM Visualizer</div>
-                    <div class="tool-card-desc">How an RFM segmentation works · 2026</div>
+                    <div class="tool-card-desc" data-i18n="tools.rfm.desc">How an RFM segmentation works · 2026</div>
                 </a>
                 <a href="tools/process-flow-analyzer.html" class="tool-card">
                     <div class="tool-card-title">Process Flow Analyzer</div>
-                    <div class="tool-card-desc">Pipeline bottleneck analysis with animated flow · 2026</div>
+                    <div class="tool-card-desc" data-i18n="tools.flow.desc">Pipeline bottleneck analysis with animated flow · 2026</div>
                 </a>
             </div>
         </div>
@@ -225,43 +230,43 @@
         <div class="section-inner">
             <div class="contact-grid fade-in">
                 <div class="contact-left">
-                    <p class="section-label contact-label">Contact</p>
-                    <h2 class="contact-headline">Ready to evolve your<br><em>data strategy?</em></h2>
-                    <p class="contact-subtext">I partner with a limited number of clients per quarter to ensure deep integration and high-impact results.</p>
+                    <p class="section-label contact-label" data-i18n="contact.label">Contact</p>
+                    <h2 class="contact-headline" data-i18n="contact.headline">Ready to evolve your<br><em>data strategy?</em></h2>
+                    <p class="contact-subtext" data-i18n="contact.subtext">I partner with a limited number of clients per quarter to ensure deep integration and high-impact results.</p>
                     <ul class="contact-perks">
-                        <li>BI Infrastructure Audit &amp; Roadmap</li>
-                        <li>Commercial Opportunity Mapping</li>
-                        <li>Interim Data Leadership</li>
+                        <li data-i18n="contact.perks.audit">BI Infrastructure Audit &amp; Roadmap</li>
+                        <li data-i18n="contact.perks.mapping">Commercial Opportunity Mapping</li>
+                        <li data-i18n="contact.perks.leadership">Interim Data Leadership</li>
                     </ul>
                 </div>
                 <div class="contact-right">
                     <div class="contact-form-card">
                         <div id="formInner">
-                            <h4 class="contact-form-title">Start a conversation</h4>
+                            <h4 class="contact-form-title" data-i18n="contact.form.title">Start a conversation</h4>
                             <form id="contactForm" class="contact-form" novalidate>
                                 <input type="hidden" name="access_key" value="d9e3974f-a258-4029-8a9f-db8ebe33d64f">
                                 <input type="hidden" name="subject" value="New message from antolinjm.com">
                                 <div class="form-group">
-                                    <input class="form-input" type="text" name="name" placeholder="Your name" required>
+                                    <input class="form-input" type="text" name="name" placeholder="Your name" data-i18n-placeholder="contact.form.name" required>
                                 </div>
                                 <div class="form-group">
-                                    <input class="form-input" type="email" name="email" placeholder="Your email" required>
+                                    <input class="form-input" type="email" name="email" placeholder="Your email" data-i18n-placeholder="contact.form.email" required>
                                 </div>
                                 <div class="form-group">
-                                    <textarea class="form-input form-textarea" name="message" placeholder="Tell me about your data challenge" rows="4" required></textarea>
+                                    <textarea class="form-input form-textarea" name="message" placeholder="Tell me about your data challenge" data-i18n-placeholder="contact.form.message" rows="4" required></textarea>
                                 </div>
                                 <button type="submit" class="form-submit-btn">
-                                    <span class="submit-text">Send inquiry</span>
+                                    <span class="submit-text" data-i18n="contact.form.submit">Send inquiry</span>
                                     <span class="submit-arrow">→</span>
                                 </button>
                             </form>
                         </div>
                         <div id="formSuccess" class="form-success" hidden>
                             <div class="form-success-check">✓</div>
-                            <h4 class="form-success-heading">Message received.</h4>
-                            <p class="form-success-text">I'll review it and be in touch shortly.</p>
+                            <h4 class="form-success-heading" data-i18n="contact.success.heading">Message received.</h4>
+                            <p class="form-success-text" data-i18n="contact.success.text">I'll review it and be in touch shortly.</p>
                         </div>
-                        <div id="formError" class="form-error" hidden>
+                        <div id="formError" class="form-error" hidden data-i18n="contact.error">
                             Something went wrong. Please try again.
                         </div>
                     </div>
@@ -272,16 +277,13 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div>José Manuel Antolín · Madrid</div>
-        <div class="social-links">
-            <a href="https://x.com/antolinjm" target="_blank" rel="noopener noreferrer">Twitter/X</a>
-            <a href="mailto:jose@antolinjm.com">jose@antolinjm.com</a>
-        </div>
+        <div>Made with ❤️ in Madrid</div>
     </footer>
 
     <!-- Scroll to top -->
     <button class="scroll-top" id="scrollTop" onclick="scrollToTop()" aria-label="Scroll to top">↑</button>
 
+    <script src="/js/i18n.js"></script>
     <script src="/js/main.js"></script>
 
 </body>

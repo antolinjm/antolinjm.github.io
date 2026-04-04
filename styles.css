@@ -177,6 +177,40 @@ nav a:hover {
     color: var(--accent);
 }
 
+.lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.lang-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 3px 5px;
+    border-radius: 3px;
+    transition: color 0.15s;
+}
+
+.lang-btn.active {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.lang-btn:hover:not(.active) {
+    color: var(--ink);
+}
+
+.lang-sep {
+    color: var(--border-deep);
+    font-size: 0.7rem;
+    pointer-events: none;
+}
+
 .header-cta-btn {
     display: inline-flex;
     align-items: center;
