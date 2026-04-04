@@ -23,8 +23,9 @@
                 <a href="#experience">Work</a>
                 <a href="#consulting">Consulting</a>
                 <a href="#tools">Tools</a>
+                <a href="#contact">Contact</a>
             </nav>
-            <a href="mailto:jose@antolinjm.com?subject=Consulting%20enquiry&body=Hi%20Jos%C3%A9%2C%0A%0AI%27d%20like%20to%20discuss%20a%20potential%20project.%0A%0A" class="header-cta-btn">Get in touch</a>
+            <a href="#contact" class="header-cta-btn">Get in touch</a>
         </div>
     </header>
 
@@ -35,7 +36,7 @@
             <h1 class="hero-headline">Turning data into<br><em>commercial decisions.</em></h1>
             <p class="hero-sub">Eight years across consulting, retail, QSR, and delivery — building the analytics infrastructure, pricing models, and CRM systems that move revenue.</p>
             <div class="hero-actions">
-                <a href="mailto:jose@antolinjm.com?subject=Consulting%20enquiry&body=Hi%20Jos%C3%A9%2C%0A%0AI%27d%20like%20to%20discuss%20a%20potential%20project.%0A%0A" class="hero-cta-btn">Get in touch</a>
+                <a href="#contact" class="hero-cta-btn">Get in touch</a>
                 <span class="status-chip"><span class="avail-dot"></span>Available for consulting work</span>
             </div>
         </div>
@@ -157,7 +158,7 @@
                 </div>
                 <div class="consulting-footer">
                     <div class="consulting-availability"><span class="avail-dot"></span>Available for new projects</div>
-                    <a href="mailto:jose@antolinjm.com?subject=Consulting%20enquiry&body=Hi%20Jos%C3%A9%2C%0A%0AI%27d%20like%20to%20discuss%20a%20potential%20project.%0A%0A" class="consulting-email-btn">Get in touch</a>
+                    <a href="#contact" class="consulting-email-btn">Get in touch</a>
                 </div>
             </div>
         </div>
@@ -215,6 +216,53 @@
                     <div class="tool-card-title">Process Flow Analyzer</div>
                     <div class="tool-card-desc">Pipeline bottleneck analysis with animated flow · 2026</div>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section-contact">
+        <div class="section-inner">
+            <div class="contact-grid fade-in">
+                <div class="contact-left">
+                    <p class="section-label contact-label">Contact</p>
+                    <h2 class="contact-headline">Ready to evolve your<br><em>data strategy?</em></h2>
+                    <p class="contact-subtext">I partner with a limited number of clients per quarter to ensure deep integration and high-impact results.</p>
+                    <ul class="contact-perks">
+                        <li>BI Infrastructure Audit &amp; Roadmap</li>
+                        <li>Commercial Opportunity Mapping</li>
+                        <li>Interim Data Leadership</li>
+                    </ul>
+                </div>
+                <div class="contact-right">
+                    <div class="contact-form-card">
+                        <h4 class="contact-form-title">Start a conversation</h4>
+                        <form id="contactForm" class="contact-form" novalidate>
+                            <input type="hidden" name="access_key" value="d9e3974f-a258-4029-8a9f-db8ebe33d64f">
+                            <input type="hidden" name="subject" value="New message from antolinjm.com">
+                            <div class="form-group">
+                                <input class="form-input" type="text" name="name" placeholder="Your name" required>
+                            </div>
+                            <div class="form-group">
+                                <input class="form-input" type="email" name="email" placeholder="Your email" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-input form-textarea" name="message" placeholder="Tell me about your data challenge" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="form-submit-btn">
+                                <span class="submit-text">Send inquiry</span>
+                                <span class="submit-arrow">→</span>
+                            </button>
+                        </form>
+                        <div id="formSuccess" class="form-success" hidden>
+                            <div class="form-success-icon">✓</div>
+                            <p class="form-success-text">Message sent. I'll be in touch shortly.</p>
+                        </div>
+                        <div id="formError" class="form-error" hidden>
+                            Something went wrong. Please try again.
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
