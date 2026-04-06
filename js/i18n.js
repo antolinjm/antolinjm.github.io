@@ -6,7 +6,7 @@
         consulting: 'Consulting',
         tools:      'Tools',
         contact:    'Contact',
-        cta:        'Work together',
+        cta:        'Let\'s talk!',
       },
       hero: {
         eyebrow:  'BI &amp; Analytics · Madrid',
@@ -106,11 +106,11 @@
         consulting: 'Consultoría',
         tools:      'Herramientas',
         contact:    'Contacto',
-        cta:        'Trabajemos juntos',
+        cta:        'Hablemos',
       },
       hero: {
         eyebrow:  'BI &amp; Analytics · Madrid',
-        headline: 'Ocho años convirtiendo datos en<br><em>decisiones de negocio.</em>',
+        headline: 'Convertir datos en<br><em>decisiones de negocio.</em>',
         sub:      'Construyo la infraestructura analítica, los modelos de pricing y los sistemas CRM que dan ventaja real a los equipos comerciales. Consultoría, retail, restauración, delivery — siempre aplicado, nunca teórico.',
         status:   'Disponible para proyectos de consultoría',
       },
