@@ -9,6 +9,22 @@ Personal portfolio and interactive tools site for José Manuel Antolín — a BI
 - **Portfolio**: `index.html` + `styles.css` + `js/*.js` — editorial portfolio site using the Editorial design palette (see `DESIGN.md` section 11)
 - **Tools**: Self-contained single HTML files in `tools/` — each is a standalone interactive visualization
 
+## File Map
+
+Read this before exploring the repo — go straight to the file you need.
+
+| File | What it does |
+|---|---|
+| `index.html` | Main portfolio page. Sections: hero, about, work, tools, contact. EN/ES via `js/i18n.js`. |
+| `styles.css` | All styles for `index.html`. Uses CSS custom properties. No tool styles here. |
+| `js/main.js` | Portfolio JS: scroll animations, nav highlighting, mobile menu, section visibility. |
+| `js/i18n.js` | EN/ES toggle. All translated strings live here as a `translations` object keyed by `data-i18n` attributes in `index.html`. |
+| `js/analytics.js` | Lightweight event tracking (page views, link clicks). No dependencies. |
+| `tools/ltv-cac-calculator.html` | LTV/CAC tool. Two-column layout. Chart.js charts. All CSS+JS inline. |
+| `tools/rfm-visualizer.html` | RFM tool. Canvas particle animation, spring physics, sidebar controls. All CSS+JS inline. |
+| `tools/process-flow-analyzer.html` | Process flow tool. Animated pipeline, Gantt chart, thermal colors. All CSS+JS inline. |
+| `DESIGN.md` | Design system: palettes, tokens, typography scale, spacing, shadows. Source of truth for visual decisions. |
+
 ## Tools Philosophy
 
 The `tools/` directory contains interactive analytical tools that showcase what the user can do professionally. These are **not just calculators** — they should feel **live, visual, and interesting**. Each tool is a portfolio piece meant to be shared (e.g., on LinkedIn).
